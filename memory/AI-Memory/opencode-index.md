@@ -30,6 +30,7 @@ Auto-loaded at session start via `~/.config/opencode/memory/index.md` (symlink �
 - **Memory vault**: `/Users/bhavyarajput/Downloads/ai_os/hercules_folder/Hercules/memory/` — THIS file is the opencode index (single source of truth); git-tracked + auto-synced.
 
 ## Sessions
+- 2026-09-08 (build): executed the full consolidation — repo moved, `memory/` vault seeded, symlinks wired, autosync LaunchAgent working (mirror→commit→push), backend boot fixed (`...execution` imports), READMEs updated, `restore.sh`/`MANIFEST.md` shipped, GitHub in sync.
 - 2026-09-08: Executed full repo + memory consolidation. Canonical vault at `memory/`; agent homes symlinked; autosync via LaunchAgent `com.user.obsidian-autosync` → `hercules/scripts/memory-autosync.sh` (15-min + WatchPaths + git push).
 - 2026-08-25: Supabase MCP + agent skills installed.
 - 2026-08-25: Shared agent memory system created (opencode + Hermes + Claude Code).
