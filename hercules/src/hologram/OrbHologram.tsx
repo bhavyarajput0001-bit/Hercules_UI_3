@@ -96,11 +96,14 @@ export function OrbHologram({
     const designCfg = getHologramDesign(design);
     let scene: OrbSceneApi;
     try {
+      console.log('[OrbHologram] Creating orb scene with design:', design, 'palette:', designCfg.accentOverride ?? pal.accent);
       scene = createOrbScene(mount, orbPaletteFromHex(designCfg.accentOverride ?? pal.accent), {
         ...designCfg.scene,
         variant: designCfg.scene.variant,
       });
-    } catch {
+      console.log('[OrbHologram] Scene created successfully');
+    } catch (err) {
+      console.error('[OrbHologram] Failed to create orb scene:', err);
       return;
     }
     sceneRef.current = scene;

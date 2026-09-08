@@ -41,6 +41,37 @@ class CEOAssistant:
             ]
             action_type = "skill_execution"
 
+        # 0. Claude Code — real implementation worker. When the directive is an
+        #    explicit request for Claude, or a code-building task (not a syntax
+        #    error to debug nor an optimization pass), dispatch the whole task to
+        #    the Claude Code execution agent rather than a sandboxed snippet.
+        #    Guarded so generation/research/design/labour intent still wins.
+        IMPLEMENT_VERBS = [
+            "build", "implement", "refactor", "scaffold", "write a script",
+            "create a project", "create a folder", "set up", "write tests",
+            "deploy", "write code to", "fix this repo", "create a function",
+            "add feature", "make a script", "create a real",
+        ]
+        OTHER_INTENT = [
+            "image", "picture", "photo", "draw", "video", "storyboard",
+            "music", "song", "audio", "logo", "badge", "svg", "email", "mail",
+            "pdf", "document", "clipboard", "theme", "color", "palette",
+            "mermaid", "flowchart", "diagram", "mindmap", "scrape", "meet",
+        ]
+        elif ("claude code" in p_lower or "using claude" in p_lower
+              or "delegate to claude" in p_lower) or (
+            any(k in p_lower for k in IMPLEMENT_VERBS)
+            and not any(k in p_lower for k in OTHER_INTENT)
+        ):
+            department = "Coding"
+            agent = "Claude Code"
+            action_type = "implement"
+            steps = [
+                "Dispatch the full directive to the Claude Code execution worker",
+                "Let it read, write, and run in the estate to perform the task",
+                "Capture the verified result and report completion"
+            ]
+
         # 1. Coding
         elif any(k in p_lower for k in ["code", "python", "script", "function", "debug", "compile", "optimize", "syntax error", "traceback"]):
             department = "Coding"
