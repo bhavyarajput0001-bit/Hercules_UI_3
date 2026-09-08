@@ -4,7 +4,7 @@ Updated: 2026-09-08
 
 ## Active task
 
-Hologram design families: integrate the Ultron orb (from `~/Downloads/ai_os/ultron_hologram/`)
+Hologram design families: integrate the Ultron orb (from `archive/ultron_hologram/`)
 as the default Hercules orb, add pinch-gesture tracking, and build THREE distinct
 orb design families — ULTRON (amber forge), NEXUS (cyan panel), AEGIS (violet
 sentinel) — individually previewable on localhost as standalone mockups, plus a
@@ -28,6 +28,7 @@ watched live in VS Code.
 - 2026-09-08 Hermes: claimed hologram design-families task.
 - 2026-09-08 Hermes: wired `hologramDesign` through domain types, defaults (`orb`/`ultron`), OrbHologram `design` prop, design options into orbScene (bloom/aberration/surge/spin), HologramDesignSwitcher UI on Core screen and Settings. tsc clean.
 - 2026-09-08 Hermes: built `holo-mockups/` standalone Vite app (individual /ultron /nexus /aegis pages + studio switcher) reusing the Hercules orb engine.
+- 2026-09-08 Antigravity: repo consolidated to `~/Downloads/ai_os/hercules_folder/Hercules/`; canonical `memory/` vault created; agent memory symlinked (opencode/claude/hermes) + autosync LaunchAgent `com.user.obsidian-autosync` → `hercules/scripts/memory-autosync.sh`. Fixed backend import depth (`claude_code.py`, `hands.py` `..execution`→`...execution`); tsc clean, both builds pass, backend boots :8420, brain stream verified, dev server :5173 up. Git pushed to `Hercules_UI_3.git`. All superseded copies archived (`archive/MANIFEST.md` + `restore.sh`).
 - 2026-09-08 Hermes: added structural variant geometry per design (designVariants.ts):
   - ULTRON: original dense wireframe sphere + cross meridians + spiral core
   - NEXUS: geodesic icosahedron shell + shield arcs + dodecahedron core + energy conduits

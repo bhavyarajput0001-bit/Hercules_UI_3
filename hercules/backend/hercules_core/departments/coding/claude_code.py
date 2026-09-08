@@ -16,7 +16,7 @@ from __future__ import annotations
 import time
 from typing import Any, Dict, Optional
 
-from ..execution.claude_code import claude_code_executor
+from ...execution.claude_code import claude_code_executor
 
 class ClaudeCodeAgent:
     """Coding-department agent backed by the Claude Code execution worker."""

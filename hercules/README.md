@@ -18,6 +18,47 @@ npm run typecheck  # tsc --noEmit, strict + noUnusedLocals
 npm run build      # typecheck, then vite build into dist/
 ```
 
+## Repository layout (consolidated 2026-09-08)
+
+Monorepo root: `~/Downloads/ai_os/hercules_folder/Hercules/`
+
+| Path | What |
+| --- | --- |
+| `hercules/` | **this app** — frontend + FastAPI backend + deterministic brain |
+| `../holo-mockups/` | standalone Vite sandbox for hologram design families |
+| `../memory/` | canonical Obsidian vault (opencode/Claude/Hermes + app memory, auto-synced, git-tracked) |
+| `../archive/` | pre-consolidation copies + regenerables; undo via `archive/restore.sh` |
+
+## Backend & brain
+
+```bash
+# from hercules/backend/
+uvicorn server:app --port 8420
+```
+
+- `server.py` exposes `POST /v1/brain/run` → streaming `GET /v1/brain/stream`
+  (`thinking → plan → step running/ok → report delta → done:true`), plus
+  `/health`, `/v1/models`, `/v1/intents`, `/v1/ai/submit`, `/v1/claude/*`,
+  `/v1/brain/modes`, `/v1/brain/procedures`, `/v1/departments`, `/v1/agents`,
+  `/v1/tasks`, `/v1/settings`, `/v1/conversations`.
+- `hercules_core/brain/` — engine, cognition, planner, hands router, modes,
+  `memory_rb.py`; the brain is **offline and deterministic** (no LLM by default,
+  ~1–9ms/directive) and writes its working memory to
+  `backend/hercules_core/data/brain-memory/`.
+- `hercules_core/departments/{designer,coding,generation,research,reasoning,pc_control}/`
+  — worker departments.
+
+## Memory vault & autosync
+
+- Agent home files are **symlinks** into `../memory/` (one source of truth):
+  `~/.config/opencode/memory/index.md → memory/AI-Memory/opencode-index.md`,
+  `~/.claude/CLAUDE.md → memory/Claude-Memory/CLAUDE.md`,
+  `~/.hermes/memories/{USER,MEMORY}.md → memory/hermes_memory/`.
+- LaunchAgent `com.user.obsidian-autosync` runs `hercules/scripts/memory-autosync.sh`
+  every 15 min and on-change (`WatchPaths`). It mirrors the app's brain-memory
+  JSON → `memory/Hercules/Brain-Memory/`, copies `.agent-team/BOARD.md` →
+  `memory/Hercules/BOARD.md`, then commits + pushes the repo.
+
 ## What's on screen
 
 19 routed screens (`src/state/nav.ts`), grouped as the shell's rail presents them:

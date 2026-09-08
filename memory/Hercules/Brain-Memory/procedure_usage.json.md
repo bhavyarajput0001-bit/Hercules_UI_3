@@ -1,6 +1,6 @@
 # procedure_usage — auto snapshot
 
-Auto-generated: 2026-09-08T19:07:32.704140
+Auto-generated: 2026-09-08T19:18:24.066856
 Source: `/Users/bhavyarajput/Downloads/ai_os/hercules_folder/Hercules/hercules/backend/hercules_core/data/brain-memory/procedure_usage.json`
 
 {
@@ -145,6 +145,18 @@ Source: `/Users/bhavyarajput/Downloads/ai_os/hercules_folder/Hercules/hercules/b
         "task": "fix login",
         "ok": true,
         "at": "2026-09-08T13:27:49Z"
+      }
+    ]
+  },
+  "summarize_document": {
+    "times": 1,
+    "successes": 1,
+    "last": "2026-09-08T19:16:19Z",
+    "examples": [
+      {
+        "task": "summarize the project structure",
+        "ok": true,
+        "at": "2026-09-08T19:16:19Z"
       }
     ]
   }

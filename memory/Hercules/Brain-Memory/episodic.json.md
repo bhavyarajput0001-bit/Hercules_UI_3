@@ -1,6 +1,6 @@
 # episodic — auto snapshot
 
-Auto-generated: 2026-09-08T19:07:32.674914
+Auto-generated: 2026-09-08T19:18:24.039405
 Source: `/Users/bhavyarajput/Downloads/ai_os/hercules_folder/Hercules/hercules/backend/hercules_core/data/brain-memory/episodic.json`
 
 [
@@ -488,5 +488,32 @@ Source: `/Users/bhavyarajput/Downloads/ai_os/hercules_folder/Hercules/hercules/b
     ],
     "ok": true,
     "summary": "what is the system cpu and memory usage \u2014 ok via system_diagnostic"
+  },
+  {
+    "at": "2026-09-08T19:16:19Z",
+    "task": "summarize the project structure",
+    "class": "document",
+    "mode": "research",
+    "procedure": "summarize_document",
+    "steps": [
+      {
+        "hand": "gather",
+        "ok": true
+      },
+      {
+        "hand": "analyzer",
+        "ok": true
+      },
+      {
+        "hand": "synthesize",
+        "ok": true
+      },
+      {
+        "hand": "docgen",
+        "ok": true
+      }
+    ],
+    "ok": true,
+    "summary": "summarize the project structure \u2014 ok via summarize_document"
   }
 ]

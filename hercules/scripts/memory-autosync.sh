@@ -64,10 +64,10 @@ if cd "$HERO_ROOT"; then
         git add -A
         git commit -m "autosync: $DATE memory vault update" >/dev/null 2>&1
         log "committed"
-        if git push origin main >/dev/null 2>> "$LOG_DIR/autosync.error.log"; then
+        if perl -e 'alarm shift; exec @ARGV' 45 git push origin main >/dev/null 2>> "$LOG_DIR/autosync.error.log"; then
             log "pushed origin/main"
         else
-            log "push skipped/failed (network?)"
+            log "push skipped/failed (timeout/network?)"
         fi
     else
         log "no changes"
