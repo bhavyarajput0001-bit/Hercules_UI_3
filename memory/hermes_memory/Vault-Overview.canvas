@@ -1,0 +1,86 @@
+{
+  "nodes": [
+    {
+      "id": "vault-overview",
+      "type": "text",
+      "x": -800,
+      "y": -400,
+      "width": 400,
+      "height": 100,
+      "text": "# 🧠 Obsidian Vaults Overview
+
+Four vaults, three agents, one shared memory",
+      "color": "1"
+    },
+    {
+      "id": "ai-memory",
+      "type": "file",
+      "x": -800,
+      "y": -200,
+      "width": 350,
+      "height": 300,
+      "file": "AI-Memory/INDEX.md",
+      "color": "1"
+    },
+    {
+      "id": "claude-memory",
+      "type": "file",
+      "x": -300,
+      "y": -200,
+      "width": 350,
+      "height": 300,
+      "file": "Claude-Memory/MEMORY.md",
+      "color": "3"
+    },
+    {
+      "id": "hermes-memory",
+      "type": "file",
+      "x": 200,
+      "y": -200,
+      "width": 350,
+      "height": 300,
+      "file": "hermes_memory/MEMORY.md",
+      "color": "5"
+    },
+    {
+      "id": "friday",
+      "type": "file",
+      "x": 700,
+      "y": -200,
+      "width": 350,
+      "height": 300,
+      "file": "FRIDAY/2026-08-02.md",
+      "color": "2"
+    },
+    {
+      "id": "shared-memory",
+      "type": "file",
+      "x": 0,
+      "y": 200,
+      "width": 400,
+      "height": 200,
+      "file": "shared-agent-memory/CLAUDE.md",
+      "color": "6"
+    },
+    {
+      "id": "jarvis-project",
+      "type": "file",
+      "x": -800,
+      "y": 200,
+      "width": 350,
+      "height": 200,
+      "file": "Claude-Memory/project/jarvis-command-center.md",
+      "color": "3"
+    }
+  ],
+  "edges": [
+    {"from": "vault-overview", "to": "ai-memory"},
+    {"from": "vault-overview", "to": "claude-memory"},
+    {"from": "vault-overview", "to": "hermes-memory"},
+    {"from": "vault-overview", "to": "friday"},
+    {"from": "shared-memory", "to": "ai-memory"},
+    {"from": "shared-memory", "to": "claude-memory"},
+    {"from": "shared-memory", "to": "hermes-memory"},
+    {"from": "jarvis-project", "to": "shared-memory"}
+  ]
+}

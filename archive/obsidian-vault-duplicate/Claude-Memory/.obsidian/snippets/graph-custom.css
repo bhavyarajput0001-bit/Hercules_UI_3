@@ -1,0 +1,21 @@
+/* Graph View Custom Styling */
+.graph-view.color-group-node { filter: drop-shadow(0 0 4px currentColor); }
+.graph-view .node-tag { font-size: 0.7em; opacity: 0.8; }
+.graph-view.color-group-tag { font-weight: 600; }
+
+/* Node type indicators */
+.graph-view .node-project { border: 2px solid #a855f7 !important; }
+.graph-view .node-session { border: 2px solid #64748b !important; }
+.graph-view .node-pattern { border: 2px solid #3b82f6 !important; }
+.graph-view .node-tool { border: 2px solid #22c55e !important; }
+.graph-view .node-reference { border: 2px solid #f97316 !important; }
+.graph-view .node-agent { border: 2px solid #ef4444 !important; }
+.graph-view .node-skill { border: 2px solid #ec4899 !important; }
+.graph-view .node-memory { border: 2px solid #f59e0b !important; }
+.graph-view .node-config { border: 2px solid #06b6d4 !important; }
+
+/* Vault background tints */
+.graph-view.color-group-AI-Memory .node { background: rgba(59, 130, 246, 0.15); }
+.graph-view.color-group-Claude-Memory .node { background: rgba(168, 85, 247, 0.15); }
+.graph-view.color-group-hermes_memory .node { background: rgba(249, 115, 22, 0.15); }
+.graph-view.color-group-FRIDAY .node { background: rgba(34, 197, 94, 0.15); }

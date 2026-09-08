@@ -1,0 +1,14 @@
+{
+  "queryResults": {
+    "showMoreButton": true,
+    "defaultSize": 20
+  },
+  "inlineQuery": {
+    "enabled": true
+  },
+  "settings": {
+    "enableJavaScript": true,
+    "inlineQueryPrefix": "=",
+    "codeBlockRenderTimeout": 10000
+  }
+}

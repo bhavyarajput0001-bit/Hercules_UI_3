@@ -1,0 +1,6 @@
+{
+  "theme": "obsidian",
+  "cssSnippets": ["graph-custom"],
+  "baseFontSize": 14,
+  "enabledCssSnippets": ["graph-custom"]
+}
