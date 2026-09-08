@@ -16,3 +16,8 @@ yarn-error.log*
 *.tsbuildinfo
 .vercel
 .turbo
+backend/.venv
+backend/__pycache__
+*.py[cod]
+.agent-team/relay/
+.agent-team/logs/

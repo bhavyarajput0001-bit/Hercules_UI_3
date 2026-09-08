@@ -32,6 +32,14 @@ export default function CommandCenterScreen() {
   const rev = store.use((s) => s.rev);
   const busy = store.use((s) => s.busy);
   const [activeLane, setActiveLane] = useState<string | null>(null);
+  const [, setChatTick] = useState(0);
+
+  useEffect(() => {
+    const off = chatState.subscribe(() => setChatTick((t) => t + 1));
+    return () => {
+      void off();
+    };
+  }, []);
 
   const canvasRef = useHologram('inline', () => {
     const s = store.get();

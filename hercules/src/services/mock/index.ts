@@ -9,7 +9,7 @@
 import type { HerculesServices } from '@/services/contracts';
 import type { Persona } from '@/types/domain';
 import { mockCore } from './core';
-import { mockAi } from './ai';
+import { mockAi, mockBrain } from './ai';
 import { mockAgents, mockDepartments, mockProjects, mockTasks } from './agents';
 import { mockMemory } from './memory';
 import { mockFiles } from './files';
@@ -33,6 +33,7 @@ export function createMockServices(): HerculesServices {
   return {
     core: mockCore,
     ai: mockAi,
+    brain: mockBrain,
     agents: mockAgents,
     departments: mockDepartments,
     tasks: mockTasks,

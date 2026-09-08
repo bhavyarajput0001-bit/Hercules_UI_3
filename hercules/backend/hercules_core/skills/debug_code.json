@@ -1,0 +1,11 @@
+{
+  "id": "debug_code",
+  "name": "Code Debugger & Fixer",
+  "description": "Analyzes error tracebacks, isolates root causes in code, generates verified patches and unit tests.",
+  "department": "Coding",
+  "agent": "Debugger",
+  "triggers": [
+    "debug code", "fix error", "fix bug", "traceback", "syntax error", "exception", "debug this"
+  ],
+  "keywords": ["debug", "error", "traceback", "exception", "stack trace", "fix", "patch", "crash"]
+}

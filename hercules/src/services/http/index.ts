@@ -28,6 +28,8 @@ export interface TransportConfig {
 
 let settingsSnapshot: AppConfig = null as unknown as AppConfig;
 
+const brainControllers = new Map<string, AbortController>();
+
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -91,8 +93,8 @@ export function connectStream(cfg: TransportConfig, onEvent: (e: MessageEvent) =
  * frame per StreamChunk; we re-shape them as an async iterable so the UI is
  * identical whether the transport is mock, http or ws.
  */
-export async function* submitPrompt(cfg: TransportConfig, input: unknown, signal?: AbortSignal): AsyncIterable<StreamChunk> {
-  const res = await fetch(`${cfg.base}/v1/ai/submit`, {
+export async function* submitPrompt(cfg: TransportConfig, input: unknown, signal?: AbortSignal, path = '/v1/ai/submit'): AsyncIterable<StreamChunk> {
+  const res = await fetch(`${cfg.base}${path}`, {
     method: 'POST',
     headers: { 'content-type': 'application/json', ...(cfg.token ? { authorization: `Bearer ${cfg.token}` } : {}) },
     body: JSON.stringify(input),
@@ -151,6 +153,27 @@ export function createHttpServices(cfg: TransportConfig, persona?: Persona): Her
       stop: (conversationId) => req(cfg, 'POST', `/v1/conversations/${conversationId}/stop`),
       actAsIntent: (text) => req(cfg, 'POST', '/v1/intents', { text }),
       summarize: (taskId) => req(cfg, 'GET', `/v1/tasks/${taskId}/summary`),
+    },
+    brain: {
+      run: (input) => {
+        const cid = input.conversationId ?? `cnv-brain-${Date.now()}`;
+        const controller = new AbortController();
+        brainControllers.set(cid, controller);
+        const stream = submitPrompt(cfg, input, controller.signal, '/v1/brain/run');
+        return (async function* () {
+          try {
+            yield* stream;
+          } finally {
+            brainControllers.delete(cid);
+          }
+        })();
+      },
+      stop: async (conversationId) => {
+        brainControllers.get(conversationId)?.abort();
+        brainControllers.delete(conversationId);
+      },
+      modes: () => req(cfg, 'GET', '/v1/brain/modes'),
+      procedures: () => req(cfg, 'GET', '/v1/brain/procedures'),
     },
     agents: {
       list: agents.list,

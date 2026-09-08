@@ -335,6 +335,7 @@ export const defaultConfig: AppConfig = {
     languages: ['en-US', 'pa-IN', 'hi-IN'],
   },
   theme: { themeId: 'obsidian-night', density: 'standard', intensity: 0.82, reduceMotion: false, allowGlowThroughCpu: true },
+  appearance: { hologram: 'orb', hologramDesign: 'ultron', glass: 'soft', cinemascope: false, gesturesEnabled: true, gesturesAutostart: false },
   privacy: {
     localFirst: true,
     telemetry: 'off',

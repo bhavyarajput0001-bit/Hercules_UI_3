@@ -89,6 +89,23 @@ export interface AIService {
   summarize(taskId: string): Promise<string>;
 }
 
+/** HERCULES Brain — the deterministic reasoner (offline-first, models as hands only). */
+export interface BrainService {
+  run(input: { directive: string; conversationId?: string; context?: Record<string, unknown> }): AsyncIterable<import('@/types/domain').StreamChunk>;
+  stop(conversationId: string): Promise<void>;
+  modes(): Promise<{ id: string; name: string; ethos: string; depth: string; planStyle: string }[]>;
+  procedures(): Promise<{
+    id: string;
+    name: string;
+    class: string;
+    triggers: string[];
+    steps: { hand: string; title: string; in: string; ok: string }[];
+    risk: string;
+    requiresApproval: boolean;
+    verify: string[];
+  }[]>;
+}
+
 export interface CommandIntent {
   verb: string;
   targetKind: 'screen' | 'task' | 'agent' | 'automation' | 'file' | 'memory' | 'media' | 'system';
@@ -371,6 +388,7 @@ export interface VoiceService {
 export interface HerculesServices {
   core: CoreService;
   ai: AIService;
+  brain: BrainService;
   agents: AgentService;
   departments: DepartmentService;
   tasks: TaskService;

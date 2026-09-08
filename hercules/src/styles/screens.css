@@ -970,6 +970,344 @@
   gap: 10px;
   min-width: 0;
 }
+
+/* ═══ ORB HOLOGRAM (3D volumetric core) ═══ */
+.orb-hologram {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+.orb-hologram--interactive {
+  cursor: grab;
+}
+.orb-hologram--interactive:active {
+  cursor: grabbing;
+}
+.orb-hologram canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+html[data-reduce-motion='true'] .orb-hologram {
+  animation: none;
+}
+
+/* ═══ FULL ULTRON HUD (camera preview · status · keyboard hints) ═══ */
+.orb-hologram-wrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+.orb-hologram-wrap .orb-hologram {
+  position: absolute;
+  inset: 0;
+}
+/* Overlay chrome */
+.orb-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.45) 100%);
+  z-index: 5;
+}
+.orb-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  z-index: 5;
+}
+.orb-scanlines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.12;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    rgba(0, 0, 0, 0.35) 3px
+  );
+  z-index: 5;
+}
+/* HUD text */
+.orb-hud {
+  position: absolute;
+  font-family: var(--font-mono, 'SF Mono', 'Courier New', monospace);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  color: var(--text, #ddd);
+  text-shadow: 0 0 8px var(--accent, #ffaa30), 0 0 2px rgba(0, 0, 0, 0.9);
+  pointer-events: none;
+  z-index: 6;
+  user-select: none;
+}
+.orb-hud--title {
+  top: 14px;
+  left: 16px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent, #ffaa30);
+  opacity: 0.9;
+}
+.orb-hud--hints {
+  bottom: 12px;
+  left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  line-height: 1.5;
+  opacity: 0.75;
+  font-size: 9px;
+}
+.orb-key {
+  display: inline-block;
+  padding: 1px 5px;
+  border: 1px solid color-mix(in srgb, var(--accent, #ffaa30) 45%, transparent);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--accent, #ffaa30) 12%, transparent);
+  color: var(--accent, #ffaa30);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  margin-right: 2px;
+}
+.orb-hud--controls {
+  top: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  pointer-events: auto;
+}
+/* Camera preview panel */
+.orb-camera-panel {
+  position: relative;
+  width: 208px;
+  height: 156px;
+  border: 1px solid color-mix(in srgb, var(--accent, #ffaa30) 50%, rgba(255, 255, 255, 0.15));
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  box-shadow: 0 0 18px color-mix(in srgb, var(--accent, #ffaa30) 30%, transparent), inset 0 0 22px rgba(0, 0, 0, 0.7);
+  opacity: 0.35;
+  transition: opacity 0.25s ease;
+  cursor: pointer;
+}
+.orb-camera-panel.visible {
+  opacity: 1;
+}
+.orb-camera-video,
+.orb-camera-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.orb-camera-video {
+  transform: scaleX(-1);
+}
+.orb-camera-overlay {
+  z-index: 2;
+}
+.orb-camera-status {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 3px 6px;
+  background: rgba(0, 0, 0, 0.6);
+  font-family: var(--font-mono, 'SF Mono', 'Courier New', monospace);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: var(--accent, #ffaa30);
+  z-index: 3;
+  text-align: center;
+}
+/* Error + buttons */
+.orb-hud-error {
+  background: rgba(120, 20, 20, 0.75);
+  border: 1px solid rgba(255, 80, 80, 0.5);
+  color: #ffb0b0;
+  font-family: var(--font-mono, 'SF Mono', 'Courier New', monospace);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  padding: 5px 8px;
+  border-radius: 4px;
+  text-align: center;
+  max-width: 210px;
+  box-shadow: 0 0 12px rgba(255, 60, 60, 0.3);
+}
+.orb-hud-row {
+  display: flex;
+  gap: 5px;
+  justify-content: flex-end;
+}
+.orb-hud-btn {
+  font-family: var(--font-mono, 'SF Mono', 'Courier New', monospace);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: var(--text, #ddd);
+  background: rgba(10, 12, 16, 0.72);
+  border: 1px solid color-mix(in srgb, var(--text, #ddd) 25%, transparent);
+  border-radius: 4px;
+  padding: 5px 9px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+.orb-hud-btn:hover {
+  border-color: var(--accent, #ffaa30);
+  color: var(--accent, #ffaa30);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--accent, #ffaa30) 30%, transparent);
+}
+.orb-hud-btn[aria-pressed='true'] {
+  border-color: var(--accent, #ffaa30);
+  color: var(--accent, #ffaa30);
+  background: color-mix(in srgb, var(--accent, #ffaa30) 12%, rgba(10, 12, 16, 0.72));
+}
+.orb-hud-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+/* Reduce motion */
+html[data-reduce-motion='true'] .orb-hud *,
+html[data-reduce-motion='true'] .orb-camera-panel {
+  transition: none;
+}
+
+/* ═══ QUICK APPEARANCE SWITCHER ═══ */
+.appearance-switch {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 2px;
+}
+.appearance-switch > button {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+  text-align: left;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: calc(var(--r) - 2px);
+  background: color-mix(in srgb, var(--surface) 70%, var(--bg-deep) 30%);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+}
+.appearance-switch > button:hover {
+  border-color: var(--line-strong);
+  background: color-mix(in srgb, var(--surface-raised) 80%, var(--bg-deep) 20%);
+  transform: translateY(-1px);
+}
+.appearance-switch > button > svg {
+  color: var(--accent);
+}
+.appearance-switch > button > b {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.appearance-switch > button > span {
+  font-size: 9.5px;
+  color: var(--text-faint);
+  line-height: 1.4;
+}
+
+/* ═══ HOLOGRAM DESIGN SWITCHER ═══ */
+.holo-design-switcher {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 8px;
+}
+.holo-design-switcher__opt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--surface-raised) 55%, transparent);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+.holo-design-switcher__opt:hover {
+  border-color: color-mix(in srgb, var(--holo-accent, var(--accent)) 55%, var(--line));
+  transform: translateY(-1px);
+}
+.holo-design-switcher__opt.is-active {
+  border-color: var(--holo-accent, var(--accent));
+  background: color-mix(in srgb, var(--holo-accent, var(--accent)) 14%, var(--surface-raised));
+  box-shadow: 0 0 14px -4px var(--holo-accent, var(--accent));
+}
+.holo-design-switcher__glyph {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--holo-accent, var(--accent));
+  background: color-mix(in srgb, var(--holo-accent, var(--accent)) 14%, transparent);
+  flex-shrink: 0;
+}
+.holo-design-switcher__meta {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+.holo-design-switcher__meta b {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+.holo-design-switcher__meta em {
+  font-style: normal;
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+.holo-design-switcher--compact {
+  margin-top: 6px;
+}
+.holo-design-switcher--compact .holo-design-switcher__opt {
+  padding: 5px 8px;
+  border-radius: 8px;
+}
+.holo-design-switcher--compact .holo-design-switcher__glyph {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  font-size: 10.5px;
+}
+
+/* ═══ CINEMASCOPE — full-bleed core presentation ═══ */
+html.cinemascope .core-screen {
+  padding: 0;
+}
+html.cinemascope .core-hero {
+  grid-template-columns: 1fr;
+}
+html.cinemascope .core-hero__side {
+  display: none;
+}
+html.cinemascope .core-hero__stage {
+  min-height: calc(100vh - var(--pad) * 4);
+  border-radius: 0;
+  border: none;
+}
 .core-greet {
   display: grid;
   gap: 3px;

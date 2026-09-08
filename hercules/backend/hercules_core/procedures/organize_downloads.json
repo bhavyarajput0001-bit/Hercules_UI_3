@@ -1,0 +1,18 @@
+{
+  "id": "organize_downloads",
+  "name": "Organize Downloads",
+  "class": "automation",
+  "triggers": ["organize my downloads", "organize downloads", "tidy downloads", "sort my downloads"],
+  "keywords": ["organize", "downloads", "folder", "by type", "sort", "tidy"],
+  "modeHint": "pragmatic",
+  "steps": [
+    {"hand": "files", "title": "Inventory the downloads folder", "in": "path", "ok": "nonempty"},
+    {"hand": "analyzer", "title": "Categorize files by type", "in": "entries", "ok": "nonempty"},
+    {"hand": "automation", "title": "Define the categorization automation", "in": "analysis", "ok": "nonempty"}
+  ],
+  "verify": ["all categories enumerated", "no move executed without approval"],
+  "report": "structured",
+  "memorySchema": {"folders": "list", "count": "integer"},
+  "risk": "medium",
+  "requiresApproval": true
+}

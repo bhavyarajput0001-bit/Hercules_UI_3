@@ -1,0 +1,18 @@
+{
+  "id": "optimize_performance",
+  "name": "Optimize Performance",
+  "class": "optimization",
+  "triggers": ["optimize", "make it faster", "performance", "speed up", "slow", "latency"],
+  "keywords": ["optimize", "slow", "latency", "perf", "bottleneck", "query", "speed", "fast"],
+  "modeHint": "optimizer",
+  "steps": [
+    {"hand": "analyzer", "title": "Profile and locate the hotspot", "in": "directive", "ok": "nonempty"},
+    {"hand": "optimizer", "title": "Apply the targeted optimization", "in": "analysis", "ok": "nonempty"},
+    {"hand": "verifier", "title": "Verify the improvement", "in": "optimization", "ok": "nonempty"}
+  ],
+  "verify": ["node_modules not touched", "change is minimal and targeted"],
+  "report": "structured",
+  "memorySchema": {"hotspot": "string", "improvement": "string"},
+  "risk": "low",
+  "requiresApproval": false
+}

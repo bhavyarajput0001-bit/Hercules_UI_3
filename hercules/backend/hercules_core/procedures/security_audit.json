@@ -1,0 +1,18 @@
+{
+  "id": "security_audit",
+  "name": "Security Audit",
+  "class": "security",
+  "triggers": ["security audit", "audit my security", "check my security", "is my system secure"],
+  "keywords": ["security", "audit", "auth", "permissions", "secrets", "vulnerabil", "risk", "breach", "leak"],
+  "modeHint": "security",
+  "steps": [
+    {"hand": "reasoner", "title": "Define the threat model and scope", "in": "directive", "ok": "nonempty"},
+    {"hand": "security", "title": "Run posture checks", "in": "directive", "ok": "nonempty"},
+    {"hand": "synthesize", "title": "Produce risk report with mitigations", "in": "posture", "ok": "nonempty"}
+  ],
+  "verify": ["risks ranked by severity", "mitigations suggested"],
+  "report": "structured",
+  "memorySchema": {"risks": "list", "severity": "string"},
+  "risk": "medium",
+  "requiresApproval": true
+}

@@ -10,6 +10,7 @@ import { Button, Chip,  SectionLabel, Select, Slider, TextInput, Toggle, cx } fr
 import { Sparkline } from '@/components/ui';
 import { THEMES } from '@/theme/engine';
 import { useTheme } from '@/theme/bridge';
+import { HologramDesignSwitcher } from '@/components/hologram/HologramDesignSwitcher';
 import { actions, store, toast, ui } from '@/state/hercules';
 import { useAsync } from '@/hooks/useAsync';
 import { relativeTime } from '@/services/mock/helpers';
@@ -20,6 +21,7 @@ const SECTIONS = [
   { id: 'persona', label: 'Persona', icon: 'agent' },
   { id: 'voice', label: 'Voice', icon: 'mic' },
   { id: 'models', label: 'Model routing', icon: 'route' },
+  { id: 'brain', label: 'Brain', icon: 'cpu' },
   { id: 'privacy', label: 'Privacy & trust', icon: 'shield' },
   { id: 'notifications', label: 'Notifications', icon: 'bell' },
   { id: 'system', label: 'System & boot', icon: 'system' },
@@ -75,6 +77,7 @@ export default function SettingsScreen() {
         {section === 'persona' && <PersonaPanel config={config} patch={patch} />}
         {section === 'voice' && <VoicePanel config={config} patch={patch} caps={caps.data} profiles={profiles.data ?? []} loaded={!!voiceCfg.data} />}
         {section === 'models' && <ModelsPanel config={config} patch={patch} models={models.data ?? []} />}
+        {section === 'brain' && <BrainPanel />}
         {section === 'privacy' && <PrivacyPanel config={config} patch={patch} />}
         {section === 'notifications' && <NotificationsPanel config={config} patch={patch} />}
         {section === 'system' && <SystemPanel config={config} patch={patch} />}
@@ -166,6 +169,50 @@ function Appearance({ config, patch, themeId }: { config: AppConfig; patch: (p: 
         <div className="set-row">
           <div><b>Let the core glow when the CPU is hot</b><span className="dim">Off means the hologram stops animating above ~80% load and shows a static frame.</span></div>
           <Toggle checked={config.theme.allowGlowThroughCpu} onChange={(v) => patch({ theme: { ...config.theme, allowGlowThroughCpu: v } })} />
+        </div>
+      </Panel>
+
+      <Panel
+        title="Hologram & surfaces"
+        sub="Pick the core’s renderer and how much frosted glass the estate wears. Changes apply live and persist."
+        aside={<Chip size="sm" tone="accent" icon="layers">{config.appearance.hologram}</Chip>}
+      >
+        <div className="set-row">
+          <div><b>Core renderer</b><span className="dim">Orb is a volumetric 3D core (drag/scroll/gesture). Core is the fast 2D canvas engine.</span></div>
+          <div className="segmented">
+            {(['core', 'orb'] as const).map((h) => (
+              <button key={h} type="button" className={cx('segmented__item', config.appearance.hologram === h && 'is-active')} onClick={() => patch({ appearance: { ...config.appearance, hologram: h } }, `${h} hologram`)}>{h}</button>
+            ))}
+          </div>
+        </div>
+        {config.appearance.hologram === 'orb' && (
+          <div className="set-row">
+            <div><b>Orb design</b><span className="dim">ULTRON is the Iron-Man forge. NEXUS is the cold instrument panel. AEGIS is the violet sentinel lattice.</span></div>
+            <HologramDesignSwitcher
+              value={config.appearance.hologramDesign ?? 'ultron'}
+              onChange={(id) => patch({ appearance: { ...config.appearance, hologramDesign: id } }, `design → ${id}`)}
+            />
+          </div>
+        )}
+        <div className="set-row">
+          <div><b>Glass treatment</b><span className="dim">Frosted adds backdrop blur + luminance to panels; soft is light; off is flat.</span></div>
+          <div className="segmented">
+            {([['soft', 'Soft'], ['frosted', 'Frosted'], ['off', 'Off']] as const).map(([v, label]) => (
+              <button key={v} type="button" className={cx('segmented__item', config.appearance.glass === v && 'is-active')} onClick={() => patch({ appearance: { ...config.appearance, glass: v } }, `${label} glass`)}>{label}</button>
+            ))}
+          </div>
+        </div>
+        <div className="set-row">
+          <div><b>Cinemascope</b><span className="dim">Full-bleed cinematic presentation on the core screen — the side rail steps back.</span></div>
+          <Toggle checked={config.appearance.cinemascope} onChange={(v) => patch({ appearance: { ...config.appearance, cinemascope: v } }, v ? 'Cinemascope on' : 'Cinemascope off')} />
+        </div>
+        <div className="set-row">
+          <div><b>Pinch gestures</b><span className="dim">Camera pinch to spin / zoom the orb. Button hands you control; it only grabs the camera when on.</span></div>
+          <Toggle checked={config.appearance.gesturesEnabled} onChange={(v) => patch({ appearance: { ...config.appearance, gesturesEnabled: v } }, v ? 'Gestures on' : 'Gestures off')} />
+        </div>
+        <div className="set-row">
+          <div><b>Auto-start camera</b><span className="dim">Grab the camera immediately on boot so gestures are ready the moment you are.</span></div>
+          <Toggle checked={config.appearance.gesturesAutostart} onChange={(v) => patch({ appearance: { ...config.appearance, gesturesAutostart: v } }, v ? 'Camera autostart on' : 'Camera autostart off')} />
         </div>
       </Panel>
     </>
@@ -612,6 +659,68 @@ function DeveloperPanel({ config, patch }: { config: AppConfig; patch: (p: Parti
           Try pasting <code>{'{"ai":{"api_key":"sk-..."}}'}</code> and applying it — the importer refuses with <b>E_SECRET_IN_CONFIG</b>
           and writes nothing. Secrets belong in the OS vault, reachable only from the Trust screen.
         </p>
+      </Panel>
+    </>
+  );
+}
+
+/* ── Brain panel ───────────────────────────────────────────────────────────── */
+
+function BrainPanel() {
+  const services = store.get().services;
+  const modes = useAsync(() => services.brain.modes(), []);
+  const procedures = useAsync(() => services.brain.procedures(), []);
+
+  return (
+    <>
+      <Panel
+        title="Thinking modes"
+        sub="The brain selects a mode automatically from the directive. You can override it here."
+      >
+        {modes.loading ? (
+          <div className="dim" style={{ fontSize: 11 }}>reading modes…</div>
+        ) : (
+          <div className="mode-grid">
+            {modes.data?.map((m) => (
+              <button key={m.id} type="button" className="modecell">
+                <b>{m.name}</b>
+                <span className="dim">{m.ethos}</span>
+                <span className="mono dim">{m.depth} · {m.planStyle.slice(0, 60)}…</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </Panel>
+
+      <Panel
+        title="Pre-made procedures"
+        sub="Procedures are the brain's hands — deterministic step graphs it can run offline. Models are only called to enrich step content."
+      >
+        {procedures.loading ? (
+          <div className="dim" style={{ fontSize: 11 }}>reading procedures…</div>
+        ) : (
+          <div className="proc-list">
+            {procedures.data?.map((p) => (
+              <div key={p.id} className="proc-row">
+                <div className="proc-row__head">
+                  <b>{p.name}</b>
+                  <Chip size="sm" tone="dim">{p.class}</Chip>
+                  <Chip size="sm" tone={p.risk === 'high' || p.risk === 'critical' ? 'warn' : p.risk === 'medium' ? 'info' : 'success'} icon="shield">{p.risk}</Chip>
+                  {p.requiresApproval && <Chip size="sm" tone="warn" icon="lock">gate</Chip>}
+                </div>
+                <div className="proc-row__triggers">{p.triggers.join(', ')}</div>
+                <div className="proc-row__steps">
+                  {p.steps.map((s, i) => (
+                    <span key={`${p.id}-${i}`} className="proc-step">
+                      <span className="mono">{i + 1}</span>
+                      <span>{s.title} <span className="dim">→ {s.hand}</span></span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </Panel>
     </>
   );

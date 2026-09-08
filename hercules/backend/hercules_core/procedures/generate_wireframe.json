@@ -1,0 +1,19 @@
+{
+  "id": "generate_wireframe",
+  "name": "Generate Wireframe",
+  "class": "design",
+  "triggers": ["wireframe", "landing page", "design a ui", "blueprint a screen", "layout for"],
+  "keywords": ["wireframe", "design", "ui", "ux", "landing", "layout", "screen", "component", "prototype"],
+  "modeHint": "craftsman",
+  "steps": [
+    {"hand": "reasoner", "title": "Clarify the screen goal and audience", "in": "directive", "ok": "nonempty"},
+    {"hand": "design", "title": "Produce the wireframe layout", "in": "directive", "ok": "nonempty"},
+    {"hand": "docgen", "title": "Document component roles", "in": "design", "ok": "nonempty"},
+    {"hand": "verifier", "title": "Check hierarchy and completeness", "in": "document", "ok": "nonempty"}
+  ],
+  "verify": ["layout has clear hierarchy", "component roles documented"],
+  "report": "markdown",
+  "memorySchema": {"screen": "string", "components": "list"},
+  "risk": "low",
+  "requiresApproval": false
+}

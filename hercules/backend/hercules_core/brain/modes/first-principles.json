@@ -1,0 +1,11 @@
+{
+  "id": "first-principles",
+  "name": "First-Principles Thinking",
+  "ethos": "Deconstruct the problem to fundamental truths, then reason up. Reject cargo-cult defaults.",
+  "appliesToClasses": ["reasoning", "architecture", "novel", "optimization"],
+  "selectionSignals": ["why", "architecture", "design", "novel", "better", "should we", "bottleneck", "strategy"],
+  "planStyle": "constraints-first: surface hard constraints, root-cause, build minimal solution satisfying constraints.",
+  "antiPatterns": ["cargo-cult best practices", "reasoning by analogy", "incrementalism on a wrong foundation"],
+  "reportTone": "deconstructive, evidence-based, constraint-explicit",
+  "depth": "deep"
+}

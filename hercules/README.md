@@ -123,6 +123,22 @@ No component changes: the same contract, a different implementation. The endpoin
 map, SSE channels, auth model and streaming chunk shape are documented in
 [`docs/BACKEND_INTEGRATION.md`](docs/BACKEND_INTEGRATION.md).
 
+### NVIDIA Nemotron adapter
+
+The repository includes a minimal local core adapter for NVIDIA's
+OpenAI-compatible endpoint. Install and run it from the project root with the
+key supplied through the process environment:
+
+```bash
+python3 -m venv backend/.venv
+backend/.venv/bin/pip install -r backend/requirements.txt
+NVIDIA_API_KEY=nvapi-... backend/.venv/bin/uvicorn backend.server:app --reload --port 8420
+```
+
+Then set `VITE_HERCULES_TRANSPORT=http` and
+`VITE_HERCULES_API_BASE=http://localhost:8420` in `.env.local` before starting
+Vite. The NVIDIA key stays on the backend and is never sent to the browser.
+
 `ws` and `ipc` (Tauri/Electron main-process bridge) share the same surface;
 `ipc` is what the packaged desktop shell uses so the renderer keeps zero
 network privileges.

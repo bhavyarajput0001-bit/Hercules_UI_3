@@ -797,6 +797,21 @@ export interface ThemeConfig {
   allowGlowThroughCpu: boolean;
 }
 
+/** Hologram renderer + UI surface preferences (OrbHologram / Appearance module). */
+export interface AppearanceConfig {
+  /** Backing renderer for the core hero: the classic 2D canvas or the 3D orb. */
+  hologram: 'core' | 'orb';
+  /** Which orb design family to render: ultron / nexus / aegis. */
+  hologramDesign: 'ultron' | 'nexus' | 'aegis';
+  /** Frosted-glass surface treatment for panels/shell. */
+  glass: 'soft' | 'frosted' | 'off';
+  /** Full-bleed cinematic mode for the core screen. */
+  cinemascope: boolean;
+  /** Pinch gestures. enabled = module present; autostart = camera grabs on boot. */
+  gesturesEnabled: boolean;
+  gesturesAutostart: boolean;
+}
+
 export interface AppConfig {
   schemaVersion: number;
   boot: { autoRunDiagnostics: boolean; cinematicSequence: boolean; showTrayIcon: boolean };
@@ -804,6 +819,7 @@ export interface AppConfig {
   ai: { router: RouterPolicy; persona: Persona; contextWindowBudget: number; reasoningDepth: 'fast' | 'balanced' | 'deep' };
   voice: VoiceConfig;
   theme: ThemeConfig;
+  appearance: AppearanceConfig;
   privacy: {
     localFirst: boolean;
     telemetry: 'off' | 'anonymous' | 'full';

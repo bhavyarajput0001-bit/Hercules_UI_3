@@ -1,0 +1,19 @@
+{
+  "id": "web_research_brief",
+  "name": "Web Research Brief",
+  "class": "research",
+  "triggers": ["research", "who is", "what is", "investigate", "find information", "report on", "search the web"],
+  "keywords": ["research", "search", "source", "web", "who is", "what is", "topic", "find"],
+  "modeHint": "research",
+  "steps": [
+    {"hand": "reasoner", "title": "Frame research question and angles", "in": "directive", "ok": "nonempty"},
+    {"hand": "search", "title": "Gather evidence from the web", "in": "directive", "ok": "nonempty"},
+    {"hand": "synthesize", "title": "Synthesize findings with sources", "in": "findings", "ok": "nonempty"},
+    {"hand": "docgen", "title": "Produce the research briefing", "in": "summary", "ok": "nonempty"}
+  ],
+  "verify": ["sources are attributed", "briefing is structured"],
+  "report": "markdown",
+  "memorySchema": {"topic": "string", "sources": "list"},
+  "risk": "low",
+  "requiresApproval": false
+}

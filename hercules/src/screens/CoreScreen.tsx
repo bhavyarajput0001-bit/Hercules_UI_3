@@ -10,6 +10,9 @@ import { Bars, Button, Chip, IconButton, Meter, Row, SectionLabel, Spinner, Stat
 import { MessageBlocks } from '@/components/chat/MessageBlocks';
 import { ChatComposer } from '@/components/chat/ChatComposer';
 import { useHologram } from '@/hologram/useHologram';
+import { OrbHologram } from '@/hologram/OrbHologram';
+import { HologramDesignSwitcher } from '@/components/hologram/HologramDesignSwitcher';
+import { type HologramDesignId } from '@/hologram/designs';
 import { actions, chatState, store, ui } from '@/state/hercules';
 import { useAsync } from '@/hooks/useAsync';
 import { formatBytes, relativeTime } from '@/services/mock/helpers';
@@ -20,7 +23,11 @@ export default function CoreScreen() {
   const agents = store.use((s) => s.agents);
   const approvals = store.use((s) => s.approvals);
   const rev = store.use((s) => s.rev);
+  const config = store.use((s) => s.config);
   const services = store.get().services;
+
+  const appearance = config.appearance;
+  const orbMode = appearance.hologram === 'orb';
 
   const canvasRef = useHologram('hero', () => {
     const s = store.get();
@@ -34,7 +41,18 @@ export default function CoreScreen() {
       satellites: s.agents.filter((a) => a.status === 'working' || a.status === 'thinking').length,
       label: `${v.state} · ${v.focus}`,
     };
-  });
+  }, [orbMode]);
+
+  const swapHologram = () => {
+    void actions.patchSettings({ appearance: { ...appearance, hologram: orbMode ? 'core' : 'orb' } }, `hologram → ${orbMode ? 'core' : 'orb'}`);
+  };
+
+  const dragOrigin = useRef<{ x: number; y: number } | null>(null);
+  const dragged = useRef(false);
+
+  const setHologramDesign = (id: HologramDesignId) => {
+    void actions.patchSettings({ appearance: { ...appearance, hologram: 'orb', hologramDesign: id } }, `design → ${id}`);
+  };
 
   const { data: snapshot } = useAsync(() => services.system.snapshot(), [rev.system]);
   const live = agents.filter((a) => a.status === 'working' || a.status === 'thinking');
@@ -45,13 +63,49 @@ export default function CoreScreen() {
       <section className="core-hero">
         <div
           className="core-hero__stage"
-          onClick={() => ui.go('command-center')}
+          onClick={() => {
+            if (dragged.current) {
+              dragged.current = false;
+              return;
+            }
+            ui.go('command-center');
+          }}
           role="button"
           tabIndex={0}
+          onPointerDown={(e) => {
+            dragOrigin.current = { x: e.clientX, y: e.clientY };
+          }}
+          onPointerUp={(e) => {
+            const o = dragOrigin.current;
+            if (o && Math.hypot(e.clientX - o.x, e.clientY - o.y) > 6) dragged.current = true;
+            dragOrigin.current = null;
+          }}
           onKeyDown={(e) => e.key === 'Enter' && ui.go('command-center')}
           title="Open Command Center"
         >
-          <canvas ref={canvasRef} className="core-hero__canvas" />
+          {orbMode ? (
+            <OrbHologram
+              variant="hero"
+              feed={() => {
+                const s = store.get();
+                const v = s.vitals;
+                const streaming = !!s.busy['core.stream'];
+                const noise = streaming || s.voice.active || s.voice.speaking ? Math.abs(Math.sin(performance.now() / 170)) : 0;
+                return {
+                  state: s.voice.active ? 'listening' : v.state,
+                  energy: v.energy,
+                  amplitude: s.voice.active ? 0.45 + noise * 0.4 : s.voice.speaking ? s.voice.level : streaming ? 0.25 + noise * 0.4 : noise,
+                  satellites: s.agents.filter((a) => a.status === 'working' || a.status === 'thinking').length,
+                  label: `${v.state} · ${v.focus}`,
+                };
+              }}
+              interactive
+              design={appearance.hologramDesign}
+              gesturesEnabled={appearance.gesturesEnabled}
+            />
+          ) : (
+            <canvas ref={canvasRef} className="core-hero__canvas" />
+          )}
           <div className="core-hero__state">
             <StatusDot
               status={
@@ -67,7 +121,16 @@ export default function CoreScreen() {
             <span className="mono">{vitals.state}</span>
           </div>
           <div className="core-hero__hint">
-            <Icon name="target" size={11} /> the core is also clickable → command center
+            {orbMode ? (
+              <>
+                <Icon name="target" size={11} /> drag to spin · scroll to zoom
+                {appearance.gesturesEnabled && <span className="dim"> · pinch your hands to gesture</span>}
+              </>
+            ) : (
+              <>
+                <Icon name="target" size={11} /> the core is also clickable → command center
+              </>
+            )}
           </div>
         </div>
 
@@ -112,6 +175,35 @@ export default function CoreScreen() {
           </div>
 
           <ChatComposer variant="core" />
+
+          <div className="appearance-switch">
+            <button type="button" onClick={swapHologram} title="Switch hologram renderer">
+              <Icon name="core" size={13} />
+              <b>{orbMode ? 'Orb' : 'Core'}</b>
+              <span>{orbMode ? '3D volumetric · drag to explore' : '2D canvas · classic'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => void actions.patchSettings({ appearance: { ...appearance, gesturesEnabled: !appearance.gesturesEnabled } }, `gestures ${appearance.gesturesEnabled ? 'off' : 'on'}`)}
+              title="Toggle pinch gestures (uses camera)"
+            >
+              <Icon name="layers" size={13} />
+              <b>Gestures</b>
+              <span>{appearance.gesturesEnabled ? 'on · camera pinch' : 'off'}</span>
+            </button>
+            <button type="button" onClick={() => ui.go('settings')} title="More appearance options">
+              <Icon name="spark" size={13} />
+              <b>Style</b>
+              <span>theme · glass · density</span>
+            </button>
+          </div>
+          {orbMode && (
+            <HologramDesignSwitcher
+              compact
+              value={appearance.hologramDesign ?? 'ultron'}
+              onChange={setHologramDesign}
+            />
+          )}
 
           <div className="core-lanes">
             <button type="button" onClick={() => void actions.toggleVoice(true)}>

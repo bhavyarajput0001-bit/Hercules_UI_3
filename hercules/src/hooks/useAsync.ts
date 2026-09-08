@@ -19,21 +19,23 @@ export function useAsync<T>(loader: () => Promise<T>, keys: (string | number)[] 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const alive = useRef(true);
+  const requestId = useRef(0);
   const loaderRef = useRef(loader);
   loaderRef.current = loader;
 
   const run = useCallback(() => {
+    const id = ++requestId.current;
     setLoading(true);
     setError(null);
     loaderRef
       .current()
       .then((value) => {
-        if (!alive.current) return;
+        if (!alive.current || id !== requestId.current) return;
         setData(value);
         setLoading(false);
       })
       .catch((e: unknown) => {
-        if (!alive.current) return;
+        if (!alive.current || id !== requestId.current) return;
         setError(e instanceof Error ? e.message : String(e));
         setLoading(false);
       });
@@ -44,6 +46,7 @@ export function useAsync<T>(loader: () => Promise<T>, keys: (string | number)[] 
     run();
     return () => {
       alive.current = false;
+      requestId.current += 1;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [...keys, run]);

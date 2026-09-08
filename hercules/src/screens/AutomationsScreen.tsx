@@ -36,6 +36,7 @@ export default function AutomationsScreen() {
   const flash = store.use((s) => s.flash);
   const busy = store.use((s) => s.busy);
   const autos = useAsync(() => services.automation.list(), [rev.automations]);
+  const brainProcs = useAsync(() => services.brain.procedures(), []);
   const [openId, setOpenId] = useState<string | null>('aut-morning-brief');
   const [editing, setEditing] = useState(false);
   const [liveSteps, setLiveSteps] = useState<{ id: string; automationId: string; status: string } | null>(null);
@@ -56,6 +57,11 @@ export default function AutomationsScreen() {
   const open = list.find((a) => a.id === openId) ?? list[0] ?? null;
 
   const spend = useMemo(() => list.reduce((n, a) => n + a.runs.reduce((m, r) => m + r.costUsd, 0), 0), [list]);
+
+  const runBrain = (directive: string) => {
+    toast({ title: 'Brain running', body: directive, severity: 'info', ttlMs: 2_400 });
+    void actions.runBrain(directive);
+  };
 
   return (
     <div className="screen autos-screen">
@@ -135,7 +141,7 @@ export default function AutomationsScreen() {
                     </div>
                     {liveSteps?.automationId === a.id && (
                       <div className="auto-row__live">
-                        <Meter value={Math.min(96, (liveStepIndex(a) / a.steps.length) * 100)} tone="accent" height={2} />
+                        <Meter value={Math.min(96, Math.max(0, liveStepIndex(a)) / Math.max(1, a.steps.length) * 100)} tone="accent" height={2} />
                         <span className="mono">running · {a.steps.find((s) => s.status === 'running')?.name ?? 'finishing'}</span>
                       </div>
                     )}
@@ -143,6 +149,46 @@ export default function AutomationsScreen() {
                 );
               })}
               {!autos.loading && !list.length && <EmptyState icon="automation" title="No standing orders" body="Give me one recurring outcome — a Monday brief, a nightly index, a weekly spend report — and I will keep it running." action={<Button size="sm" variant="solid" icon="plus" onClick={() => setEditing(true)}>Create one</Button>} />}
+            </div>
+          </section>
+
+          <section className="hud__panel">
+            <header className="hud__panel-head">
+              <div className="hud__panel-title">
+                <Icon name="cpu" size={14} className="hud__panel-icon" />
+                <div>
+                  <h3>Pre-made procedures (Brain)</h3>
+                  <p className="hud__panel-sub">Deterministic step graphs the brain can run offline. Models only enrich step content.</p>
+                </div>
+              </div>
+              <Chip size="sm" tone="accent">{brainProcs.data?.length ?? 0}</Chip>
+            </header>
+            <div className="hud__panel-body autos-list">
+              {brainProcs.loading && <Row className="autos-loading"><Icon name="refresh" size={12} className="spin" /> reading procedures…</Row>}
+              {brainProcs.data?.map((p) => (
+                <div key={p.id} className="auto-row" onClick={() => void runBrain(p.triggers[0] ?? p.name)}>
+                  <div className="auto-row__head">
+                    <span className="auto-row__pip" style={{ background: 'var(--accent)' }} />
+                    <b>{p.name}</b>
+                    <Chip size="sm" tone="dim">{p.class}</Chip>
+                    <Chip size="sm" tone={p.risk === 'high' || p.risk === 'critical' ? 'warn' : p.risk === 'medium' ? 'info' : 'success'} icon="shield">{p.risk}</Chip>
+                    {p.requiresApproval && <Chip size="sm" tone="warn" icon="lock">gate</Chip>}
+                    <span className="spacer" />
+                    <span className="mono dim">{p.triggers[0] ?? 'manual'}</span>
+                  </div>
+                  <div className="auto-row__meta">
+                    <span>{p.steps.map((s) => s.title).join(' → ')}</span>
+                  </div>
+                  <div className="auto-row__foot">
+                    <span className="mono dim">{p.steps.length} steps · runs via brain</span>
+                    <span className="spacer" />
+                    <Button size="sm" icon="play" title="Run via brain" onClick={(e) => { e.stopPropagation(); runBrain(p.triggers[0] ?? p.name); }}>
+                      Run
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              {!brainProcs.loading && !brainProcs.data?.length && <span className="dim" style={{ fontSize: 11 }}>No brain procedures loaded.</span>}
             </div>
           </section>
         </div>

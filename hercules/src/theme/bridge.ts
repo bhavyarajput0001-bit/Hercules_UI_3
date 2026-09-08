@@ -6,8 +6,17 @@
  */
 import { useEffect, useState } from 'react';
 import { applyTheme, THEMES } from './engine';
-import type { AppConfig, ThemeConfig } from '@/types/domain';
+import type { AppConfig, AppearanceConfig, ThemeConfig } from '@/types/domain';
 import { mockServices } from '@/services/registry';
+
+/** Apply the frosted-glass / cinemascope surface treatment to <html>. */
+export function applyAppearance(appearance: AppearanceConfig) {
+  const root = document.documentElement;
+  // Glass surface intensity: soft = subtle luminance, frosted = strong blur+sheen.
+  root.dataset.glass = appearance.glass;
+  root.dataset.glassLevel = appearance.glass === 'frosted' ? '0.55' : appearance.glass === 'soft' ? '0.18' : '0';
+  root.classList.toggle('cinemascope', appearance.cinemascope);
+}
 
 let current: ThemeConfig = mockSettingsTheme();
 
@@ -36,6 +45,7 @@ export function currentPalette() {
 export function applyThemeFromConfig(config: AppConfig) {
   current = config.theme;
   applyTheme(config.theme);
+  applyAppearance(config.appearance);
   window.dispatchEvent(new CustomEvent('hercules:theme', { detail: { theme: config.theme } }));
 }
 
@@ -58,6 +68,9 @@ export function useTheme() {
 export async function initTheme() {
   const config = await mockServices.settings.get().catch(() => null);
   if (config) applyThemeFromConfig(config);
-  else applyTheme(current);
+  else {
+    applyTheme(current);
+    applyAppearance({ hologram: 'orb', hologramDesign: 'ultron', glass: 'soft', cinemascope: false, gesturesEnabled: true, gesturesAutostart: false });
+  }
   return config;
 }

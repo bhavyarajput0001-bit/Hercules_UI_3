@@ -1,0 +1,19 @@
+{
+  "id": "summarize_document",
+  "name": "Summarize Document",
+  "class": "document",
+  "triggers": ["summarize", "digest", "condense", "tl;dr", "give me the gist"],
+  "keywords": ["summarize", "summary", "document", "pdf", "readme", "transcript", "digest", "long"],
+  "modeHint": "minimalist",
+  "steps": [
+    {"hand": "gather", "title": "Collect the source document", "in": "directive", "ok": "nonempty"},
+    {"hand": "analyzer", "title": "Extract key sections and points", "in": "context", "ok": "nonempty"},
+    {"hand": "synthesize", "title": "Compress into a concise summary", "in": "analysis", "ok": "nonempty"},
+    {"hand": "docgen", "title": "Format summary as a briefing", "in": "summary", "ok": "nonempty"}
+  ],
+  "verify": ["summary is shorter than source", "key points covered"],
+  "report": "structured",
+  "memorySchema": {"source": "string", "length": "string"},
+  "risk": "low",
+  "requiresApproval": false
+}

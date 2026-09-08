@@ -1,0 +1,146 @@
+{
+  "organize_downloads": {
+    "times": 3,
+    "successes": 0,
+    "last": "2026-09-08T18:22:40Z",
+    "examples": [
+      {
+        "task": "organize my downloads folder by type",
+        "ok": false,
+        "at": "2026-09-08T01:04:00Z"
+      },
+      {
+        "task": "organize my downloads",
+        "ok": false,
+        "at": "2026-09-08T01:07:26Z"
+      },
+      {
+        "task": "organize my downloads folder by type",
+        "ok": false,
+        "at": "2026-09-08T18:22:40Z"
+      }
+    ]
+  },
+  "code_generator": {
+    "times": 3,
+    "successes": 3,
+    "last": "2026-09-08T18:22:40Z",
+    "examples": [
+      {
+        "task": "debug this python traceback and fix it: ZeroDivisionError on line 12",
+        "ok": true,
+        "at": "2026-09-08T01:04:00Z"
+      },
+      {
+        "task": "implement a feature",
+        "ok": true,
+        "at": "2026-09-08T12:30:44Z"
+      },
+      {
+        "task": "debug this python traceback and fix it: ZeroDivisionError on line 12",
+        "ok": true,
+        "at": "2026-09-08T18:22:40Z"
+      }
+    ]
+  },
+  "web_research_brief": {
+    "times": 2,
+    "successes": 2,
+    "last": "2026-09-08T18:22:40Z",
+    "examples": [
+      {
+        "task": "research who runs the ai_os project and report with sources",
+        "ok": true,
+        "at": "2026-09-08T01:04:00Z"
+      },
+      {
+        "task": "research who runs the ai_os project and report with sources",
+        "ok": true,
+        "at": "2026-09-08T18:22:40Z"
+      }
+    ]
+  },
+  "compose_email": {
+    "times": 2,
+    "successes": 2,
+    "last": "2026-09-08T18:22:40Z",
+    "examples": [
+      {
+        "task": "write a professional email to the hiring team",
+        "ok": true,
+        "at": "2026-09-08T01:04:00Z"
+      },
+      {
+        "task": "write a professional email to the hiring team",
+        "ok": true,
+        "at": "2026-09-08T18:22:40Z"
+      }
+    ]
+  },
+  "system_diagnostic": {
+    "times": 2,
+    "successes": 2,
+    "last": "2026-09-08T18:22:40Z",
+    "examples": [
+      {
+        "task": "what is the system cpu and memory usage",
+        "ok": true,
+        "at": "2026-09-08T01:04:00Z"
+      },
+      {
+        "task": "what is the system cpu and memory usage",
+        "ok": true,
+        "at": "2026-09-08T18:22:40Z"
+      }
+    ]
+  },
+  "default-code": {
+    "times": 4,
+    "successes": 4,
+    "last": "2026-09-08T12:30:39Z",
+    "examples": [
+      {
+        "task": "debug this error: TypeError on line 5",
+        "ok": true,
+        "at": "2026-09-08T01:12:36Z"
+      },
+      {
+        "task": "debug this error: TypeError on line 5",
+        "ok": true,
+        "at": "2026-09-08T01:16:25Z"
+      },
+      {
+        "task": "debug this error: TypeError on line 5",
+        "ok": true,
+        "at": "2026-09-08T01:22:54Z"
+      },
+      {
+        "task": "fix the login bug",
+        "ok": true,
+        "at": "2026-09-08T12:30:39Z"
+      }
+    ]
+  },
+  "default-reasoning": {
+    "times": 3,
+    "successes": 3,
+    "last": "2026-09-08T13:27:49Z",
+    "examples": [
+      {
+        "task": "x",
+        "ok": true,
+        "at": "2026-09-08T12:30:51Z"
+      },
+      {
+        "task": "x",
+        "ok": true,
+        "at": "2026-09-08T12:30:58Z"
+      },
+      {
+        "task": "fix login",
+        "ok": true,
+        "at": "2026-09-08T13:27:49Z"
+      }
+    ]
+  }
+}

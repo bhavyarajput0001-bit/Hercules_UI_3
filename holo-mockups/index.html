@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HERCULES · Hologram Studio</title>
+    <style>
+      :root {
+        --bg: #05060a;
+        --panel: rgba(12, 15, 24, 0.72);
+        --line: rgba(var(--acc-rgb), 0.16);
+        --text: #e8ecf4;
+        --dim: #9aa3b5;
+        --faint: #5c6476;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: ui-sans-serif, system-ui, sans-serif; overflow: hidden; }
+      #stage { position: fixed; inset: 0; }
+      #stage canvas { display: block; }
+      .hud {
+        position: fixed;
+        top: 18px; left: 22px;
+        display: flex; flex-direction: column; gap: 6px;
+        pointer-events: none;
+        z-index: 10;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+      .hud .title { font-size: 20px; font-weight: 800; letter-spacing: 0.32em; color: var(--acc); text-shadow: 0 0 24px color-mix(in srgb, var(--acc) 60%, transparent); }
+      .hud .sub { font-size: 10px; letter-spacing: 0.24em; color: var(--faint); text-transform: uppercase; }
+      .hud .blurb { font-size: 11px; color: var(--dim); max-width: 340px; line-height: 1.5; margin-top: 4px; }
+      .hud .tag { display: inline-flex; gap: 6px; align-items: center; font-size: 9px; letter-spacing: 0.18em; color: var(--acc); border: 1px solid var(--line); padding: 3px 8px; border-radius: 999px; width: fit-content; }
+      .dock {
+        position: fixed;
+        bottom: 22px; left: 50%;
+        transform: translateX(-50%);
+        display: flex; gap: 10px;
+        padding: 8px;
+        background: var(--panel);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 14px;
+        backdrop-filter: blur(14px);
+        z-index: 20;
+        box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+      }
+      .dock button {
+        border: 1px solid transparent;
+        background: transparent;
+        color: var(--dim);
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        padding: 9px 16px;
+        border-radius: 9px;
+        cursor: pointer;
+        transition: all 0.18s;
+        display: flex; align-items: center; gap: 8px;
+      }
+      .dock button:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+      .dock button.active { color: var(--acc); border-color: var(--line); background: color-mix(in srgb, var(--acc) 12%, transparent); }
+      .dock button .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 10px currentColor; }
+      .hint {
+        position: fixed;
+        bottom: 84px; left: 50%;
+        transform: translateX(-50%);
+        font-size: 9.5px;
+        letter-spacing: 0.2em;
+        color: var(--faint);
+        text-transform: uppercase;
+        z-index: 10;
+        font-family: ui-monospace, monospace;
+      }
+      .gesture-state {
+        position: fixed;
+        top: 18px; right: 22px;
+        font-family: ui-monospace, monospace;
+        font-size: 9.5px;
+        letter-spacing: 0.14em;
+        color: var(--dim);
+        border: 1px solid rgba(255,255,255,0.08);
+        padding: 6px 10px;
+        border-radius: 8px;
+        background: var(--panel);
+        backdrop-filter: blur(10px);
+        z-index: 20;
+        cursor: pointer;
+      }
+      .gesture-state.on { color: var(--acc); border-color: var(--line); }
+    </style>
+  </head>
+  <body>
+    <div class="hud" id="hud"></div>
+    <div id="stage"></div>
+    <div class="hint" id="hint">drag to spin · scroll to zoom · pinch to gesture</div>
+    <div class="gesture-state" id="gestureState">CAMERA OFF</div>
+    <div class="dock" id="dock"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

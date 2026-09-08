@@ -22,6 +22,7 @@ import type {
   EntityId,
 } from '@/types/domain';
 import { mockServices } from '@/services/registry';
+import { applyThemeFromConfig } from '@/theme/bridge';
 import type { ScreenId } from './nav';
 
 export interface SelectedEntity {
@@ -370,6 +371,7 @@ export const actions = {
         }
         if (chunk.block) chatState.appendBlock(chunk.block);
         if (chunk.done) chatState.endReply();
+        if (chunk.coreState) s.set({ vitals: { ...s.get().vitals, state: chunk.coreState } });
       }
     } catch (e) {
       chatState.endReply();
@@ -385,10 +387,37 @@ export const actions = {
     }
     return streamed;
   },
+  /** Run a brain directive (deterministic reasoner). Streams into the home surface. */
+  async runBrain(directive: string, conversationId?: string) {
+    const trimmed = (directive ?? '').trim();
+    if (!trimmed) return null;
+    const { services } = s.get();
+    ui.flashFor('chat');
+    const cid = conversationId ?? chatState.conversationId;
+    chatState.push({ id: `local-brain-${Date.now()}`, role: 'operator', at: new Date().toISOString(), blocks: [{ kind: 'text', text: `🧠 ${trimmed}` }], conversationId: cid });
+    chatState.beginReply();
+    try {
+      for await (const chunk of services.brain.run({ directive: trimmed, conversationId: cid })) {
+        if (chunk.delta) chatState.appendDelta(chunk.delta);
+        if (chunk.block) chatState.appendBlock(chunk.block);
+        if (chunk.done) chatState.endReply();
+        if (chunk.coreState) s.set({ vitals: { ...s.get().vitals, state: chunk.coreState } });
+      }
+    } catch (e) {
+      chatState.endReply();
+      toastBad('Brain error', e instanceof Error ? e.message : String(e), {
+        label: 'Retry',
+        run: () => void actions.runBrain(trimmed, cid),
+      });
+      return null;
+    }
+    return trimmed;
+  },
   stopStream() {
     const { services } = s.get();
     chatState.endReply();
     void services.ai.stop(chatState.conversationId).catch(() => undefined);
+    void services.brain.stop(chatState.conversationId).catch(() => undefined);
     toast({ title: 'Stream halted', body: 'Agents parked at the last safe boundary.', severity: 'info', ttlMs: 3_000 });
   },
 
@@ -711,7 +740,6 @@ export const actions = {
     const { services } = s.get();
     const next = await run(() => services.settings.patch(patch), { silent: true });
     if (next) {
-      const { applyThemeFromConfig } = await import('@/theme/bridge');
       applyThemeFromConfig(next);
       s.set({ config: next });
       if (label) toast({ title: label, severity: 'info', ttlMs: 2_600 });
@@ -723,7 +751,6 @@ export const actions = {
     const { services } = s.get();
     const next = await run(() => services.settings.reset(), { ok: 'Defaults restored' });
     if (next) {
-      const { applyThemeFromConfig } = await import('@/theme/bridge');
       applyThemeFromConfig(next);
       s.set({ config: next });
       ui.bump('settings');

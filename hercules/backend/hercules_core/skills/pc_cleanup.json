@@ -1,0 +1,11 @@
+{
+  "id": "pc_cleanup",
+  "name": "PC Storage & Temp Cleaner",
+  "description": "Scans Windows temp files, caches, and Downloads/Desktop directories to clean disk space and organize folders.",
+  "department": "PC Control",
+  "agent": "Automation Agent",
+  "triggers": [
+    "clean pc", "clean temp", "clean cache", "organize downloads", "organize desktop", "free disk space"
+  ],
+  "keywords": ["clean", "temp", "cache", "storage", "disk", "organize", "downloads", "recycle bin"]
+}

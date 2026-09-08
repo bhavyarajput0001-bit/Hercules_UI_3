@@ -1,0 +1,11 @@
+{
+  "id": "reasoning",
+  "name": "Deductive Reasoning",
+  "ethos": "Step-by-step logical analysis: premises, dependencies, deduction chain, validation.",
+  "appliesToClasses": ["reasoning", "analysis", "problem"],
+  "selectionSignals": ["solve", "why", "analy", "root cause", "logic", "prove", "determine", "explain"],
+  "planStyle": "premises → dependencies → deterministic deduction chain → validate consistency and eliminate contradictions.",
+  "antiPatterns": ["asserting without premises", "ignoring constraints", "skipping validation"],
+  "reportTone": "structured, premise-to-conclusion, verifiable",
+  "depth": "balanced"
+}

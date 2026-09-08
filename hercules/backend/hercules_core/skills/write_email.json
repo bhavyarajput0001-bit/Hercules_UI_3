@@ -1,0 +1,22 @@
+{
+  "id": "write_email",
+  "name": "Professional Email Composer",
+  "description": "Drafts clear, high-impact professional, technical, or executive emails with subject, greeting, body, and CTA.",
+  "department": "Labour Agents",
+  "agent": "Email Automation",
+  "triggers": [
+    "write email", "send email", "draft email", "compose email", "email to", "write an email"
+  ],
+  "keywords": ["email", "mail", "recipient", "subject", "formal", "casual", "newsletter"],
+  "template": {
+    "subject": "[Clear and Action-Oriented Subject]",
+    "salutation": "Hi [Name / Team],",
+    "context": "[Brief explanation of purpose / background]",
+    "key_points": [
+      "[Point 1]",
+      "[Point 2]"
+    ],
+    "call_to_action": "[Concrete next step / request]",
+    "signoff": "Best regards,\n[Your Name]"
+  }
+}

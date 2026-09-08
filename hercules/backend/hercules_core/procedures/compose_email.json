@@ -1,0 +1,18 @@
+{
+  "id": "compose_email",
+  "name": "Compose Email",
+  "class": "write",
+  "triggers": ["write an email", "draft an email", "compose email", "email to", "reply to"],
+  "keywords": ["email", "draft", "compose", "message", "write", "reply", "letter"],
+  "modeHint": "pragmatic",
+  "steps": [
+    {"hand": "gather", "title": "Identify recipient and intent", "in": "directive", "ok": "nonempty"},
+    {"hand": "docgen", "title": "Draft the email body", "in": "context", "ok": "nonempty"},
+    {"hand": "verifier", "title": "Check tone, length, and clarity", "in": "document", "ok": "nonempty"}
+  ],
+  "verify": ["subject line present", "tone matches intent", "no attachments referenced unless provided"],
+  "report": "markdown",
+  "memorySchema": {"recipient": "string", "purpose": "string"},
+  "risk": "low",
+  "requiresApproval": false
+}

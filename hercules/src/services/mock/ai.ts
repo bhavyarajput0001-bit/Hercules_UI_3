@@ -8,7 +8,7 @@
  */
 import type { AIService, CommandIntent, Unsubscribe } from '@/services/contracts';
 import type { ChatMessage, MessageBlock, StreamChunk } from '@/types/domain';
-import { conversations as seedConversations, messages as seedMessages } from './fixtures';
+import { conversations as seedConversations, messages as seedMessages, models } from './fixtures';
 import { holdState, logCore, pushActivity, pushNotice, setState, world } from './runtime';
 import { chance, clamp, iso, pick, rand, randInt, sleepCancellable, tokenize, uid } from './helpers';
 
@@ -224,7 +224,6 @@ function applySideEffects(text: string, intent: CommandIntent) {
 
 export const mockAi: AIService = {
   async models() {
-    const { models } = await import('./fixtures');
     return models.map((m) => ({
       ...m,
       latencyMs: Math.max(40, Math.round(m.latencyMs * clamp(0.85 + rand(-0.15, 0.3), 0.7, 1.4))),
@@ -366,5 +365,118 @@ export const mockThreads = {
   subscribe(fn: (id: string) => void): Unsubscribe {
     const iv = window.setInterval(() => fn(active.id), 15_000);
     return () => window.clearInterval(iv);
+  },
+};
+
+/* ── mock Brain service ───────────────────────────────────────────────────── */
+
+const MOCK_MODES = [
+  { id: 'first-principles', name: 'First-Principles Thinking', ethos: 'Deconstruct the problem to fundamental truths, then reason up. Reject cargo-cult defaults.', depth: 'deep', planStyle: 'constraints-first: surface hard constraints, root-cause, build minimal solution satisfying constraints.' },
+  { id: 'pragmatic', name: 'Pragmatic Shipper', ethos: 'Ship a working result now, iterate later. Bias to action over perfection.', depth: 'balanced', planStyle: 'smallest-viable path: one pass to a working deliverable, note follow-ups as optional steps.' },
+  { id: 'craftsman', name: 'Craftsman Perfectionist', ethos: 'Code is craft. Long-lived quality, correct contracts, clean APIs.', depth: 'deep', planStyle: 'contracts-first: define interfaces, write durable implementations, verify style and coherence.' },
+  { id: 'systems', name: 'Systems Architect', ethos: 'See the whole. Design boundaries, contracts, data flow and evolution — not just components.', depth: 'deep', planStyle: 'boundaries-first: map contracts and data flow, define failure modes, plan observability and evolution.' },
+  { id: 'security', name: 'Security Paranoid', ethos: 'Assume breach. Defense in depth, least privilege, auditability.', depth: 'deep', planStyle: 'threat-model-first: enumerate attack surface, apply least-privilege, validate inputs, log-and-audit every sensitive step.' },
+  { id: 'reasoning', name: 'Deductive Reasoning', ethos: 'Step-by-step logical analysis: premises, dependencies, deduction chain, validation.', depth: 'balanced', planStyle: 'premises → dependencies → deterministic deduction chain → validate consistency and eliminate contradictions.' },
+  { id: 'research', name: 'Deep Researcher', ethos: 'Multi-step investigation with source discipline and claim tracing.', depth: 'deep', planStyle: 'identity-scope → fan out angles → gather with source URLs → dedup/rank by confidence → verify claims → cite.' },
+  { id: 'optimizer', name: 'Performance Optimizer', ethos: 'Measure, don\'t guess. Profile the bottleneck, fix hotspots, verify the win.', depth: 'deep', planStyle: 'profile → identify true bottleneck → targeted change → measure before/after to prove improvement.' },
+  { id: 'explorer', name: 'Experimental Explorer', ethos: 'Try novel approaches and learn fast. R&D, spikes and tech evaluation.', depth: 'balanced', planStyle: 'generate alternatives → prototype the risky/novel one quickly → learn and report what works.' },
+  { id: 'minimalist', name: 'Minimalist Essentialist', ethos: 'Less but better. Cut scope, debt and bloat; keep only what earns its place.', depth: 'balanced', planStyle: 'audit for redundancy → remove non-essential → keep a lean, focused result.' },
+];
+
+const MOCK_PROCEDURES = [
+  { id: 'code_generator', name: 'Code Generator', class: 'code', triggers: ['generate code', 'write code', 'create function'], steps: [{ hand: 'reasoner', title: 'Frame requirements and constraints', in: 'directive', ok: 'nonempty' }, { hand: 'code', title: 'Generate implementation scaffold', in: 'directive', ok: 'nonempty' }, { hand: 'verifier', title: 'Verify implementation for correctness', in: 'code', ok: 'nonempty' }, { hand: 'docgen', title: 'Produce usage documentation', in: 'code', ok: 'nonempty' }], risk: 'low', requiresApproval: false, verify: ['implementation is non-empty', 'document explains usage'] },
+  { id: 'web_research_brief', name: 'Web Research Brief', class: 'research', triggers: ['research', 'who is', 'what is', 'investigate'], steps: [{ hand: 'reasoner', title: 'Frame research question and angles', in: 'directive', ok: 'nonempty' }, { hand: 'search', title: 'Gather evidence from the web', in: 'directive', ok: 'nonempty' }, { hand: 'synthesize', title: 'Synthesize findings with sources', in: 'context', ok: 'nonempty' }, { hand: 'docgen', title: 'Produce the research briefing', in: 'context', ok: 'nonempty' }], risk: 'low', requiresApproval: false, verify: ['sources cited', 'findings synthesized'] },
+  { id: 'summarize_document', name: 'Summarize Document', class: 'document', triggers: ['summarize', 'digest', 'condense', 'tl;dr'], steps: [{ hand: 'gather', title: 'Collect the source document', in: 'directive', ok: 'nonempty' }, { hand: 'analyzer', title: 'Extract key sections and points', in: 'context', ok: 'nonempty' }, { hand: 'docgen', title: 'Produce the summary', in: 'context', ok: 'nonempty' }], risk: 'low', requiresApproval: false, verify: ['summary covers key points'] },
+  { id: 'organize_downloads', name: 'Organize Downloads', class: 'automation', triggers: ['organize my downloads', 'organize downloads', 'tidy downloads'], steps: [{ hand: 'files', title: 'Inventory the downloads folder', in: 'path', ok: 'nonempty' }, { hand: 'analyzer', title: 'Categorize files by type', in: 'entries', ok: 'nonempty' }, { hand: 'automation', title: 'Define the categorization automation', in: 'context', ok: 'nonempty' }], risk: 'low', requiresApproval: false, verify: ['categories defined', 'automation ready'] },
+  { id: 'system_diagnostic', name: 'System Diagnostic', class: 'system', triggers: ['system diagnostic', 'check my system', 'diagnose my machine'], steps: [{ hand: 'shell', title: 'Gather system telemetry', in: 'directive', ok: 'nonempty' }, { hand: 'analyzer', title: 'Identify bottlenecks or anomalies', in: 'telemetry', ok: 'nonempty' }, { hand: 'synthesize', title: 'Produce a health verdict with next steps', in: 'analysis', ok: 'nonempty' }], risk: 'medium', requiresApproval: false, verify: ['telemetry collected', 'verdict produced'] },
+  { id: 'security_audit', name: 'Security Audit', class: 'security', triggers: ['security audit', 'audit my security', 'check my security'], steps: [{ hand: 'reasoner', title: 'Define the threat model and scope', in: 'directive', ok: 'nonempty' }, { hand: 'security', title: 'Run posture checks', in: 'directive', ok: 'nonempty' }, { hand: 'synthesize', title: 'Produce findings with remediation', in: 'results', ok: 'nonempty' }], risk: 'high', requiresApproval: true, verify: ['threat model defined', 'checks run'] },
+  { id: 'optimize_performance', name: 'Optimize Performance', class: 'optimization', triggers: ['optimize', 'make it faster', 'performance', 'slow'], steps: [{ hand: 'reasoner', title: 'Frame the optimization goal', in: 'directive', ok: 'nonempty' }, { hand: 'analyzer', title: 'Profile and locate the bottleneck', in: 'directive', ok: 'nonempty' }, { hand: 'optimizer', title: 'Apply the targeted optimization', in: 'analysis', ok: 'nonempty' }, { hand: 'verifier', title: 'Measure before/after to prove improvement', in: 'results', ok: 'nonempty' }], risk: 'medium', requiresApproval: false, verify: ['bottleneck identified', 'improvement measured'] },
+  { id: 'generate_wireframe', name: 'Generate Wireframe', class: 'design', triggers: ['wireframe', 'landing page', 'design a ui', 'layout for'], steps: [{ hand: 'reasoner', title: 'Clarify the screen goal and audience', in: 'directive', ok: 'nonempty' }, { hand: 'design', title: 'Produce the wireframe layout', in: 'directive', ok: 'nonempty' }, { hand: 'docgen', title: 'Document the design decisions', in: 'layout', ok: 'nonempty' }], risk: 'low', requiresApproval: false, verify: ['layout produced', 'decisions documented'] },
+  { id: 'compose_email', name: 'Compose Email', class: 'write', triggers: ['write an email', 'draft an email', 'compose email'], steps: [{ hand: 'gather', title: 'Identify recipient and intent', in: 'directive', ok: 'nonempty' }, { hand: 'docgen', title: 'Draft the email body', in: 'context', ok: 'nonempty' }, { hand: 'verifier', title: 'Check tone, length, and clarity', in: 'draft', ok: 'nonempty' }], risk: 'low', requiresApproval: false, verify: ['email drafted', 'tone checked'] },
+  { id: 'data_transform', name: 'Data Transform', class: 'transform', triggers: ['convert', 'transform', 'extract', 'reformat', 'parse'], steps: [{ hand: 'gather', title: 'Identify source format and target format', in: 'directive', ok: 'nonempty' }, { hand: 'transformer', title: 'Apply the transformation', in: 'context', ok: 'nonempty' }, { hand: 'verifier', title: 'Validate output structure', in: 'output', ok: 'nonempty' }], risk: 'low', requiresApproval: false, verify: ['output valid', 'structure matches target'] },
+];
+
+const mockBrainRuns = new Map<string, AbortController>();
+
+export const mockBrain: import('@/services/contracts').BrainService = {
+  run(input) {
+    const { directive } = input;
+    const threadId = input.conversationId ?? 'cnv-brain-' + uid();
+    const messageId = uid('msg');
+    const controller = new AbortController();
+    mockBrainRuns.set(threadId, controller);
+
+    // Pick a mode based on simple keyword matching
+    let mode = MOCK_MODES[0];
+    for (const m of MOCK_MODES) {
+      if (directive.toLowerCase().includes(m.id.replace('-', ''))) {
+        mode = m;
+        break;
+      }
+    }
+
+    // Pick a procedure based on triggers
+    let procedure = MOCK_PROCEDURES[0];
+    for (const p of MOCK_PROCEDURES) {
+      if (p.triggers.some((t) => directive.toLowerCase().includes(t))) {
+        procedure = p;
+        break;
+      }
+    }
+
+    const steps: { id: string; label: string; status: 'pending' | 'active' | 'done' | 'failed'; agent?: string }[] = procedure.steps.map((s, i) => ({
+      id: `s${i + 1}`,
+      label: s.title,
+      agent: `hand:${s.hand}`,
+      status: i === 0 ? 'active' : 'pending',
+    }));
+
+    const gen = (async function* () {
+      yield { conversationId: threadId, messageId, coreState: 'thinking' } satisfies import('@/types/domain').StreamChunk;
+      await sleepCancellable(randInt(200, 400), controller.signal);
+
+      yield { conversationId: threadId, messageId, block: { kind: 'plan', steps }, coreState: 'thinking' } satisfies import('@/types/domain').StreamChunk;
+      await sleepCancellable(randInt(200, 400), controller.signal);
+
+      for (let i = 0; i < steps.length; i++) {
+        steps[i].status = 'active';
+        yield { conversationId: threadId, messageId, block: { kind: 'tool-call', tool: `brain.${procedure.steps[i].hand}`, args: '{}', status: 'running' }, coreState: 'executing' } satisfies import('@/types/domain').StreamChunk;
+        await sleepCancellable(randInt(150, 350), controller.signal);
+        steps[i].status = 'done';
+        yield { conversationId: threadId, messageId, block: { kind: 'tool-call', tool: `brain.${procedure.steps[i].hand}`, args: '{}', status: 'ok' }, coreState: 'executing' } satisfies import('@/types/domain').StreamChunk;
+      }
+
+      yield { conversationId: threadId, messageId, block: { kind: 'plan', steps: steps.map(s => ({ ...s, status: 'done' })) }, coreState: 'speaking' } satisfies import('@/types/domain').StreamChunk;
+      await sleepCancellable(100, controller.signal);
+
+      const report = `# ${directive}\n\n**Class** ${procedure.class} · **Mode** ${mode.name} · **Procedure** ${procedure.name}\n\n**Verification** passed\n\n${steps.map(s => `✓ ${s.label}: (simulated)`).join('\n')}`;
+      yield { conversationId: threadId, messageId, delta: report, coreState: 'speaking' } satisfies import('@/types/domain').StreamChunk;
+
+      yield { conversationId: threadId, messageId, done: true, coreState: 'idle' } satisfies import('@/types/domain').StreamChunk;
+    })();
+
+    // Clean up the abort-controller table when the run naturally ends.
+    const wrapped = (async function* () {
+      try {
+        yield* gen;
+      } finally {
+        mockBrainRuns.delete(threadId);
+      }
+    })();
+
+    return wrapped;
+  },
+  async stop(conversationId: string) {
+    const controller = mockBrainRuns.get(conversationId);
+    if (controller) {
+      controller.abort();
+      mockBrainRuns.delete(conversationId);
+    }
+  },
+  async modes() {
+    return MOCK_MODES;
+  },
+  async procedures() {
+    return MOCK_PROCEDURES;
   },
 };

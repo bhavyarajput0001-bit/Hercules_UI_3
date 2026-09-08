@@ -1,0 +1,19 @@
+{
+  "id": "code_generator",
+  "name": "Code Generator",
+  "class": "code",
+  "triggers": ["generate code", "write code", "create function", "implement feature", "build api", "create script"],
+  "keywords": ["code", "python", "function", "api", "implement", "build", "script", "program", "compile"],
+  "modeHint": "craftsman",
+  "steps": [
+    {"hand": "reasoner", "title": "Frame requirements and constraints", "in": "directive", "ok": "nonempty"},
+    {"hand": "code", "title": "Generate implementation scaffold", "in": "directive", "ok": "nonempty"},
+    {"hand": "verifier", "title": "Verify implementation for correctness", "in": "code", "ok": "nonempty"},
+    {"hand": "docgen", "title": "Produce usage documentation", "in": "code", "ok": "nonempty"}
+  ],
+  "verify": ["implementation is non-empty", "document explains usage"],
+  "report": "markdown",
+  "memorySchema": {"task": "string", "language": "string"},
+  "risk": "low",
+  "requiresApproval": false
+}

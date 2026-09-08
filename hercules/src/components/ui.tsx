@@ -10,6 +10,7 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type MouseEvent as ReactMouseEvent,
   type ReactNode,
 } from 'react';
 import { Icon, type IconName } from './Icon';
@@ -377,7 +378,7 @@ export function Button({
 }: {
   children?: ReactNode;
   icon?: IconName;
-  onClick?: () => void;
+  onClick?: (e: ReactMouseEvent<HTMLButtonElement>) => void;
   variant?: 'solid' | 'ghost' | 'outline' | 'bare' | 'danger';
   size?: 'sm' | 'md' | 'lg';
   busy?: boolean;

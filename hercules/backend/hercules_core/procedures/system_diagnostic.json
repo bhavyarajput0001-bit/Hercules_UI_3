@@ -1,0 +1,18 @@
+{
+  "id": "system_diagnostic",
+  "name": "System Diagnostic",
+  "class": "system",
+  "triggers": ["system diagnostic", "check my system", "what is wrong with my system", "diagnose my machine"],
+  "keywords": ["system", "cpu", "memory", "ram", "disk", "gpu", "diagnostic", "telemetry", "monitor", "health"],
+  "modeHint": "optimizer",
+  "steps": [
+    {"hand": "shell", "title": "Gather system telemetry", "in": "system", "ok": "nonempty"},
+    {"hand": "analyzer", "title": "Identify bottlenecks or anomalies", "in": "telemetry", "ok": "nonempty"},
+    {"hand": "synthesize", "title": "Produce a health verdict with next steps", "in": "analysis", "ok": "nonempty"}
+  ],
+  "verify": ["telemetry captured", "verdict references data"],
+  "report": "structured",
+  "memorySchema": {"components": "list", "findings": "list"},
+  "risk": "low",
+  "requiresApproval": false
+}

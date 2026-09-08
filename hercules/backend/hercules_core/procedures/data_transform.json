@@ -1,0 +1,18 @@
+{
+  "id": "data_transform",
+  "name": "Data Transform",
+  "class": "transform",
+  "triggers": ["convert", "transform", "extract", "reformat", "parse", "translate"],
+  "keywords": ["convert", "transform", "format", "parse", "extract", "csv", "json", "jsonl", "translate", "reformat"],
+  "modeHint": "pragmatic",
+  "steps": [
+    {"hand": "gather", "title": "Identify source format and target format", "in": "directive", "ok": "nonempty"},
+    {"hand": "transformer", "title": "Apply the transformation", "in": "context", "ok": "nonempty"},
+    {"hand": "verifier", "title": "Validate the output structure", "in": "transformed", "ok": "nonempty"}
+  ],
+  "verify": ["output parses", "no data silently dropped"],
+  "report": "structured",
+  "memorySchema": {"from": "string", "to": "string", "records": "integer"},
+  "risk": "low",
+  "requiresApproval": false
+}

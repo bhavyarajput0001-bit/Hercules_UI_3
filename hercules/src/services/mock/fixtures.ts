@@ -392,7 +392,7 @@ export const projects: Project[] = [
     goal: 'Ship the private alpha of the Hercules runtime to 40 design partners without losing the soul of the product.',
     status: 'at-risk',
     progress: 71,
-    departmentIds: ['dep-eng', 'dep-design-void' as string, 'dep-knowledge', 'dep-comms'],
+    departmentIds: ['dep-eng', 'dep-knowledge', 'dep-comms'],
     taskIds: ['tsk-001', 'tsk-002', 'tsk-004', 'tsk-009', 'tsk-013'],
     riskScore: 68,
     budgetUsd: 4200,

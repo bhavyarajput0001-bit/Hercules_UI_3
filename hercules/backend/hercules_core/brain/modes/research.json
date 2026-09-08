@@ -1,0 +1,11 @@
+{
+  "id": "research",
+  "name": "Deep Researcher",
+  "ethos": "Multi-step investigation with source discipline and claim tracing.",
+  "appliesToClasses": ["research", "intelligence", "document"],
+  "selectionSignals": ["research", "find", "investigate", "who is", "what is", "search", "source", "report on", "compare"],
+  "planStyle": "identity-scope → fan out angles → gather with source URLs → dedup/rank by confidence → verify claims → cite.",
+  "antiPatterns": ["unsourced claims", "single-source bias", "ignoring contradictions"],
+  "reportTone": "sourced, confidence-ranked, contradiction-aware",
+  "depth": "deep"
+}
