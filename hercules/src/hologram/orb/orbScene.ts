@@ -146,6 +146,11 @@ export function createOrbScene(container: HTMLElement, initial: OrbPalette, desi
   const width = container.clientWidth;
   const height = container.clientHeight;
 
+  console.log('[createOrbScene] container:', container, 'width:', width, 'height:', height);
+  if (width === 0 || height === 0) {
+    console.error('[createOrbScene] Container has zero dimensions!', { width, height });
+  }
+
   // ——— SCENE ———
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(55, width / height, 0.1, 500);
@@ -157,6 +162,8 @@ export function createOrbScene(container: HTMLElement, initial: OrbPalette, desi
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 0.8;
   container.appendChild(renderer.domElement);
+
+  console.log('[createOrbScene] renderer.domElement appended, canvas size:', renderer.domElement.width, 'x', renderer.domElement.height);
 
   // ——— POST PROCESSING ———
   const composer = new EffectComposer(renderer);
@@ -702,6 +709,7 @@ export function createOrbScene(container: HTMLElement, initial: OrbPalette, desi
     composer.render();
   }
   animate();
+  console.log('[createOrbScene] animate() started, rafId:', rafId);
 
   // ——— RESIZE ———
   function onResize() {

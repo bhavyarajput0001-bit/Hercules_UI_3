@@ -96,6 +96,7 @@ export function OrbHologram({
     const designCfg = getHologramDesign(design);
     let scene: OrbSceneApi;
     try {
+      console.log('[OrbHologram] Mount element:', mount, 'clientWidth:', mount.clientWidth, 'clientHeight:', mount.clientHeight);
       console.log('[OrbHologram] Creating orb scene with design:', design, 'palette:', designCfg.accentOverride ?? pal.accent);
       scene = createOrbScene(mount, orbPaletteFromHex(designCfg.accentOverride ?? pal.accent), {
         ...designCfg.scene,

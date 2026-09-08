@@ -139,6 +139,7 @@ class ClaudeCodeExecutor:
             proc = subprocess.Popen(
                 cmd,
                 cwd=str(workdir),
+                stdin=subprocess.DEVNULL,  # child must not hold our stdin open or it never EOFs
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
@@ -165,7 +166,16 @@ class ClaudeCodeExecutor:
                 else:
                     leftover.append(line)
         finally:
-            proc.wait(timeout=10)
+            # Reap the child. Never let a stuck wait turn into an unhandled
+            # 500 on the SSE stream — kill and drain instead.
+            try:
+                proc.wait(timeout=10)
+            except Exception:  # noqa: BLE001 — subprocess.TimeoutExpired etc.
+                try:
+                    proc.kill()
+                except Exception:  # noqa: BLE001
+                    pass
+                proc.wait(timeout=5)
 
         # Process finished without a `result` frame — surface raw tail if any.
         if leftover:

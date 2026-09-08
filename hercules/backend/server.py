@@ -79,6 +79,7 @@ class BrainRunRequest(BaseModel):
 
 class ClaudeRunRequest(BaseModel):
     text: str
+    conversationId: str | None = None
     cwd: str | None = None
     autonomy: str | None = None
     maxTurns: int | None = None
