@@ -26,6 +26,8 @@ try:
         skills_registry,
         brain as hercules_brain,
     )
+    from backend.hercules_core.execution.claude_code import claude_code_executor
+    from backend.hercules_core.departments.coding.claude_code import claude_code_agent
 except ImportError:
     from hercules_core import (
         hercules,
@@ -35,6 +37,8 @@ except ImportError:
         skills_registry,
         brain as hercules_brain,
     )
+    from hercules_core.execution.claude_code import claude_code_executor
+    from hercules_core.departments.coding.claude_code import claude_code_agent
 
 # HERCULES BRAIN — the deterministic reasoner. Planning/thinking never calls a
 # model; only explicit Hands (Phase 3 router) may call an LLM, and a missing key
@@ -71,6 +75,13 @@ class BrainRunRequest(BaseModel):
     directive: str
     conversationId: str | None = None
     context: dict | None = None
+
+
+class ClaudeRunRequest(BaseModel):
+    text: str
+    cwd: str | None = None
+    autonomy: str | None = None
+    maxTurns: int | None = None
 
 
 def sse(payload: dict) -> str:
@@ -315,6 +326,87 @@ def submit(request: SubmitPrompt) -> StreamingResponse:
 
 
 # --------------------------------------------------------------------------
+# CLAUDE CODE endpoints — dispatch a directive to the Claude Code execution
+# worker directly (bypassing the classifier) for real end-to-end task work.
+# --------------------------------------------------------------------------
+
+@app.post("/v1/claude/run")
+def claude_run(request: ClaudeRunRequest) -> dict:
+    """One-shot structured result (for automation / non-UI callers)."""
+    if not request.text.strip():
+        raise HTTPException(status_code=400, detail="text is required")
+    result = claude_code_agent.run_task(
+        request.text,
+        cwd=request.cwd,
+        autonomy=request.autonomy,
+    )
+    result["id"] = f"claude-{uuid4().hex[:6]}"
+    result["timestamp"] = time.strftime("%Y-%m-%dT%H:%M:%SZ")
+    return result
+
+
+def claude_submit_stream(request: ClaudeRunRequest, conversation_id: str, message_id: str) -> Iterator[str]:
+    """SSE stream mirroring /v1/ai/submit's StreamChunk envelope so the React
+    chat renders it with zero frontend changes: thinking -> plan -> tool-call
+    (running -> ok) -> live deltas -> done."""
+    yield sse({"conversationId": conversation_id, "messageId": message_id, "coreState": "thinking"})
+
+    plan_block = {
+        "kind": "plan",
+        "steps": [
+            {"id": "s1", "label": "Dispatch to Claude Code execution worker", "status": "active", "agent": "Claude Code"},
+            {"id": "s2", "label": "Perform the task on the machine", "status": "pending", "agent": "Claude Code"},
+            {"id": "s3", "label": "Report verified result", "status": "pending", "agent": "Claude Code"},
+        ],
+    }
+    yield sse({"conversationId": conversation_id, "messageId": message_id, "block": plan_block, "coreState": "thinking"})
+    yield sse({"conversationId": conversation_id, "messageId": message_id, "coreState": "executing"})
+
+    tool_block = {"kind": "tool-call", "tool": "coding.claude-code", "args": "{}", "status": "running"}
+    yield sse({"conversationId": conversation_id, "messageId": message_id, "block": dict(tool_block), "coreState": "executing"})
+
+    is_error = False
+    for event in claude_code_executor.stream(request.text, cwd=request.cwd, autonomy=request.autonomy):
+        if event["kind"] == "text":
+            yield sse({"conversationId": conversation_id, "messageId": message_id,
+                       "delta": event["text"], "coreState": "executing"})
+        elif event["kind"] == "tool":
+            yield sse({"conversationId": conversation_id, "messageId": message_id,
+                       "block": {"kind": "tool-call", "tool": f"claude.{event['name']}",
+                                 "args": "{}", "status": "running"}, "coreState": "executing"})
+        elif event["kind"] == "result":
+            is_error = bool(event.get("isError", False))
+            tool_block["status"] = "error" if is_error else "ok"
+            tool_block["result"] = (event.get("result") or "")[:2000]
+            yield sse({"conversationId": conversation_id, "messageId": message_id,
+                       "block": dict(tool_block), "coreState": "speaking"})
+        elif event["kind"] == "error":
+            is_error = True
+            tool_block["status"] = "error"
+            tool_block["result"] = event["error"]
+            yield sse({"conversationId": conversation_id, "messageId": message_id,
+                       "block": dict(tool_block), "coreState": "speaking"})
+
+    plan_block["steps"] = [{**s, "status": ("failed" if is_error and i == 0 else "done")} for i, s in enumerate(plan_block["steps"])]
+    yield sse({"conversationId": conversation_id, "messageId": message_id, "block": plan_block, "coreState": "speaking"})
+    yield sse({"conversationId": conversation_id, "messageId": message_id, "done": True, "coreState": "idle"})
+
+
+@app.post("/v1/claude/submit")
+def claude_submit(request: ClaudeRunRequest) -> StreamingResponse:
+    """SSE stream of a Claude Code execution (same envelope as /v1/ai/submit)."""
+    if not request.text.strip():
+        raise HTTPException(status_code=400, detail="text is required")
+    conversation_id = request.conversationId or f"conv-{uuid4().hex}"
+    message_id = f"msg-{uuid4().hex}"
+    return StreamingResponse(
+        claude_submit_stream(request, conversation_id, message_id),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
+# --------------------------------------------------------------------------
 # HERCULES BRAIN endpoints — the deterministic reasoner (thinks offline)
 # --------------------------------------------------------------------------
 
@@ -511,7 +603,7 @@ def get_departments() -> list[dict]:
             "backlogPressure": 15,
             "budgetUsd": 3000,
             "spentUsd": 410,
-            "tools": ["compiler", "debugger", "optimizer"],
+            "tools": ["compiler", "debugger", "optimizer", "claude_code"],
             "kpis": [{"label": "Build Passes", "value": "99.1%"}],
             "color": "#3b82f6",
             "icon": "terminal"
@@ -580,6 +672,7 @@ def get_agents() -> list[dict]:
         {"id": "agt-compiler", "name": "Compiler Agent", "role": "Code Runner", "category": "Coding", "departmentId": "dep-coding", "status": "active", "autonomy": 0.9, "tools": ["compiler"]},
         {"id": "agt-debugger", "name": "Debugger Agent", "role": "Syntax & Runtime Fixer", "category": "Coding", "departmentId": "dep-coding", "status": "active", "autonomy": 0.9, "tools": ["debugger"]},
         {"id": "agt-optimizer", "name": "Optimizer Agent", "role": "Performance Engineer", "category": "Coding", "departmentId": "dep-coding", "status": "active", "autonomy": 0.8, "tools": ["optimizer"]},
+        {"id": "agt-claude-code", "name": "Claude Code", "role": "Real Implementation Executor", "category": "Coding", "departmentId": "dep-coding", "status": "active", "autonomy": 0.8, "tools": ["claude_code", "terminal", "filesystem", "git"]},
         {"id": "agt-scraper", "name": "Scraper Agent", "role": "Web Ingestion", "category": "Research", "departmentId": "dep-research", "status": "active", "autonomy": 0.8, "tools": ["scraper"]},
         {"id": "agt-refiner", "name": "Refiner Agent", "role": "Information Condenser", "category": "Research", "departmentId": "dep-research", "status": "active", "autonomy": 0.85, "tools": ["refiner"]},
         {"id": "agt-sys-monitor", "name": "System Monitor", "role": "Hardware Telemetry", "category": "PC Control", "departmentId": "dep-pc", "status": "active", "autonomy": 0.95, "tools": ["sys_monitor"]},

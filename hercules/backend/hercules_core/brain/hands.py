@@ -168,6 +168,27 @@ def hand_llm(input_: Any) -> Dict[str, Any]:
     })
 
 
+def hand_claude_code(input_: Any) -> Dict[str, Any]:
+    """Real end-to-end execution via the Claude Code worker. The brain keeps
+    planning; this hand is the machine that performs a step's directive on the
+    actual estate. Delegates to hercules_core.execution. Never raises."""
+    from ..execution.claude_code import claude_code_executor  # lazy: avoid import cycles
+
+    directive = str(input_.get("directive", input_)) if isinstance(input_, dict) else str(input_)
+    cwd = input_.get("cwd") if isinstance(input_, dict) else None
+    if not directive:
+        return _fail("claude-code hand: no directive provided")
+    res = claude_code_executor.run(directive, cwd=cwd)
+    if not res.get("ok"):
+        return _fail(f"claude-code hand failed: {res.get('error') or res.get('output') or 'unknown error'}")
+    return _ok({
+        "output": res.get("output", ""),
+        "num_turns": res.get("numTurns", 0),
+        "duration_ms": res.get("durationMs", 0),
+        "cwd": res.get("cwd", ""),
+    })
+
+
 # Registry
 HANDS: Dict[str, Callable[[Any], Dict[str, Any]]] = {
     "reasoner": hand_reasoner,
@@ -185,6 +206,7 @@ HANDS: Dict[str, Callable[[Any], Dict[str, Any]]] = {
     "optimizer": hand_optimizer,
     "transformer": hand_transformer,
     "design": hand_design,
+    "claude-code": hand_claude_code,
     "llm": hand_llm,
 }
 
