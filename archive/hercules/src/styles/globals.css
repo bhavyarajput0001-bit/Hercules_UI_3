@@ -1,0 +1,552 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-sans: 'Space Grotesk', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-display: 'Syne', system-ui, sans-serif;
+  }
+
+  * {
+    @apply border-hercules-border-subtle;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-hercules-background text-hercules-text font-sans antialiased overflow-hidden;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  ::selection {
+    @apply bg-hercules-primary/30 text-hercules-text;
+  }
+
+  ::-webkit-scrollbar {
+    @apply w-1.5 h-1.5;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-hercules-border rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-hercules-text-muted/50;
+  }
+
+  ::-webkit-scrollbar-corner {
+    @apply bg-transparent;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-hercules-primary ring-offset-2 ring-offset-hercules-background;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-hercules-surface/50 backdrop-blur-xl border border-hercules-border/50;
+  }
+
+  .glass-elevated {
+    @apply bg-hercules-surface-elevated/60 backdrop-blur-2xl border border-hercules-border/60 shadow-depth-3;
+  }
+
+  .glass-overlay {
+    @apply bg-hercules-surface-overlay/70 backdrop-blur-2xl border border-hercules-border/70 shadow-depth-4;
+  }
+
+  .panel {
+    @apply glass rounded-2xl p-6;
+  }
+
+  .panel-elevated {
+    @apply glass-elevated rounded-2xl p-6;
+  }
+
+  .panel-compact {
+    @apply glass rounded-xl p-4;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hercules-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hercules-background disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  .btn-primary {
+    @apply btn bg-hercules-primary text-hercules-background hover:bg-hercules-primary/90 active:bg-hercules-primary shadow-glow-sm;
+  }
+
+  .btn-secondary {
+    @apply btn bg-hercules-surface-elevated text-hercules-text hover:bg-hercules-surface-elevated/80 border border-hercules-border;
+  }
+
+  .btn-ghost {
+    @apply btn bg-transparent text-hercules-text-muted hover:text-hercules-text hover:bg-hercules-surface-elevated/50;
+  }
+
+  .btn-danger {
+    @apply btn bg-hercules-error/10 text-hercules-error hover:bg-hercules-error/20 border border-hercules-error/30;
+  }
+
+  .btn-icon {
+    @apply btn p-2 rounded-xl;
+  }
+
+  .input {
+    @apply w-full px-4 py-3 rounded-xl bg-hercules-surface-elevated/50 border border-hercules-border/50 text-hercules-text placeholder:text-hercules-text-dim transition-all duration-200 focus:border-hercules-primary focus:ring-2 focus:ring-hercules-primary/20 focus:bg-hercules-surface-elevated;
+  }
+
+  .label {
+    @apply block text-caption font-medium text-hercules-text-muted uppercase tracking-wider mb-2;
+  }
+
+  .card {
+    @apply glass rounded-2xl p-5 transition-all duration-300 hover:border-hercules-border/80 hover:shadow-depth-2;
+  }
+
+  .card-interactive {
+    @apply card cursor-pointer hover:scale-[1.02] active:scale-[0.98];
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-caption font-medium;
+  }
+
+  .badge-success {
+    @apply badge bg-hercules-success/15 text-hercules-success border border-hercules-success/30;
+  }
+
+  .badge-warning {
+    @apply badge bg-hercules-warning/15 text-hercules-warning border border-hercules-warning/30;
+  }
+
+  .badge-error {
+    @apply badge bg-hercules-error/15 text-hercules-error border border-hercules-error/30;
+  }
+
+  .badge-info {
+    @apply badge bg-hercules-info/15 text-hercules-info border border-hercules-info/30;
+  }
+
+  .badge-neutral {
+    @apply badge bg-hercules-surface-elevated text-hercules-text-muted border border-hercules-border;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-hercules-primary via-hercules-accent to-hercules-secondary;
+  }
+
+  .border-gradient {
+    @apply relative before:absolute before:inset-0 before:rounded-[inherit] before:bg-gradient-to-r before:from-hercules-primary/50 before:via-hercules-accent/50 before:to-hercules-secondary/50 before:-z-10;
+  }
+
+  .hologram-glow {
+    box-shadow:
+      0 0 20px var(--h-holo-glow),
+      0 0 40px var(--h-holo-glow),
+      0 0 80px var(--h-holo-glow);
+  }
+}
+
+@layer utilities {
+  .animate-in {
+    animation: fade-in 0.3s ease-out forwards;
+  }
+
+  .animate-out {
+    animation: fade-out 0.2s ease-in forwards;
+  }
+
+  .slide-in-from-top {
+    animation: slide-down 0.3s ease-out reverse forwards;
+  }
+
+  .slide-in-from-bottom {
+    animation: slide-up 0.3s ease-out forwards;
+  }
+
+  .slide-in-from-left {
+    animation: slide-left 0.3s ease-out forwards;
+  }
+
+  .slide-in-from-right {
+    animation: slide-right 0.3s ease-out forwards;
+  }
+
+  @keyframes slide-left {
+    from { transform: translateX(-20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  @keyframes slide-right {
+    from { transform: translateX(20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+
+  .perspective-2000 {
+    perspective: 2000px;
+  }
+}
+
+/* Hologram Canvas Styles */
+.hologram-canvas {
+  @apply absolute inset-0 w-full h-full pointer-events-none;
+}
+
+.hologram-container {
+  @apply relative w-full h-full;
+  isolation: isolate;
+}
+
+/* Voice Waveform */
+.voice-waveform {
+  @apply flex items-end justify-center gap-1 h-16;
+}
+
+.voice-waveform-bar {
+  @apply w-1 rounded-full bg-hercules-primary transition-all duration-75 ease-out;
+}
+
+/* Command Bar */
+.command-bar {
+  @apply glass-elevated border-t border-hercules-border/50;
+}
+
+.command-input-wrapper {
+  @apply relative flex-1;
+}
+
+.command-input {
+  @apply w-full px-6 py-4 pl-14 pr-16 bg-transparent border-none text-hercules-text placeholder:text-hercules-text-dim text-body-lg font-mono focus:outline-none;
+}
+
+/* Sidebar */
+.sidebar {
+  @apply fixed left-0 top-0 z-sticky h-full bg-hercules-surface/80 backdrop-blur-2xl border-r border-hercules-border/50 transition-all duration-300 ease-out-expo;
+}
+
+.sidebar-collapsed {
+  @apply w-16;
+}
+
+.sidebar-expanded {
+  @apply w-72;
+}
+
+/* Module Pages */
+.module-page {
+  @apply fixed inset-0 z-base overflow-hidden;
+}
+
+.module-content {
+  @apply h-full w-full overflow-y-auto p-6 md:p-8 lg:p-10;
+}
+
+/* Media Player */
+.media-player {
+  @apply fixed bottom-0 left-0 right-0 z-fixed h-20 glass-overlay border-t border-hercules-border/50 flex items-center justify-between px-4 md:px-8;
+}
+
+/* Notifications */
+.notification-toast {
+  @apply glass-elevated rounded-xl p-4 min-w-[300px] max-w-[420px] shadow-depth-4 border-l-4 animate-in;
+}
+
+.notification-success {
+  @apply notification-toast border-l-hercules-success;
+}
+
+.notification-warning {
+  @apply notification-toast border-l-hercules-warning;
+}
+
+.notification-error {
+  @apply notification-toast border-l-hercules-error;
+}
+
+.notification-info {
+  @apply notification-toast border-l-hercules-info;
+}
+
+/* Modal */
+.modal-backdrop {
+  @apply fixed inset-0 z-modal-backdrop bg-black/60 backdrop-blur-sm animate-in;
+}
+
+.modal-content {
+  @apply fixed z-modal glass-overlay rounded-2xl shadow-depth-4 max-h-[90vh] max-w-[90vw] animate-in;
+}
+
+/* Command Palette */
+.command-palette {
+  @apply fixed top-1/4 left-1/2 -translate-x-1/2 z-command-palette w-full max-w-2xl glass-overlay rounded-2xl shadow-depth-4 overflow-hidden animate-in;
+}
+
+/* Dropdown */
+.dropdown {
+  @apply absolute z-popover glass-overlay rounded-xl shadow-depth-4 min-w-[200px] py-2 animate-in;
+}
+
+.dropdown-item {
+  @apply flex items-center gap-3 px-4 py-2.5 text-body-sm text-hercules-text-muted hover:text-hercules-text hover:bg-hercules-surface-elevated/50 transition-colors duration-150 cursor-pointer;
+}
+
+.dropdown-divider {
+  @apply h-px bg-hercules-border my-2;
+}
+
+/* Tooltip */
+.tooltip {
+  @apply absolute z-tooltip glass-elevated rounded-lg px-3 py-1.5 text-caption text-hercules-text whitespace-nowrap shadow-depth-3 animate-in;
+}
+
+/* Loading States */
+.skeleton {
+  @apply bg-hercules-surface-elevated/50 animate-pulse rounded;
+}
+
+.skeleton-text {
+  @apply h-4 w-full skeleton;
+}
+
+.skeleton-circle {
+  @apply skeleton rounded-full;
+}
+
+.skeleton-rect {
+  @apply skeleton rounded-lg;
+}
+
+/* Empty State */
+.empty-state {
+  @apply flex flex-col items-center justify-center py-16 px-8 text-center;
+}
+
+.empty-state-icon {
+  @apply w-16 h-16 text-hercules-text-dim mb-4 opacity-50;
+}
+
+.empty-state-title {
+  @apply text-heading-md text-hercules-text mb-2;
+}
+
+.empty-state-description {
+  @apply text-body-sm text-hercules-text-muted max-w-sm;
+}
+
+/* Status Indicators */
+.status-dot {
+  @apply relative w-2 h-2 rounded-full;
+}
+
+.status-dot::after {
+  content: '';
+  @apply absolute inset-0 rounded-full animate-pulse-slow;
+}
+
+.status-active {
+  @apply status-dot bg-hercules-success;
+}
+
+.status-active::after {
+  @apply bg-hercules-success;
+}
+
+.status-idle {
+  @apply status-dot bg-hercules-text-dim;
+}
+
+.status-idle::after {
+  @apply bg-hercules-text-dim;
+}
+
+.status-warning {
+  @apply status-dot bg-hercules-warning;
+}
+
+.status-warning::after {
+  @apply bg-hercules-warning;
+}
+
+.status-error {
+  @apply status-dot bg-hercules-error;
+}
+
+.status-error::after {
+  @apply bg-hercules-error;
+}
+
+.status-processing {
+  @apply status-dot bg-hercules-info;
+}
+
+.status-processing::after {
+  @apply bg-hercules-info animation-[pulse_1s_ease-in-out_infinite];
+}
+
+/* Progress Bar */
+.progress-bar {
+  @apply h-1.5 bg-hercules-surface-elevated rounded-full overflow-hidden;
+}
+
+.progress-fill {
+  @apply h-full bg-gradient-to-r from-hercules-primary to-hercules-accent rounded-full transition-all duration-500 ease-out-expo;
+}
+
+/* Agent Card */
+.agent-card {
+  @apply card-interactive group relative overflow-hidden;
+}
+
+.agent-card::before {
+  content: '';
+  @apply absolute inset-0 bg-gradient-to-r from-hercules-primary/0 via-hercules-primary/5 to-hercules-primary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500;
+}
+
+.agent-card-active {
+  @apply border-hercules-primary/50 shadow-glow-sm;
+}
+
+/* Department Card */
+.department-card {
+  @apply card-interactive relative overflow-hidden;
+}
+
+.department-card::before {
+  content: '';
+  @apply absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-hercules-primary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300;
+}
+
+/* Task Card */
+.task-card {
+  @apply card-interactive relative;
+}
+
+/* Workflow Node */
+.workflow-node {
+  @apply glass-elevated rounded-xl p-4 min-w-[200px] transition-all duration-300;
+}
+
+.workflow-node-active {
+  @apply workflow-node border-hercules-primary/50 shadow-glow;
+}
+
+.workflow-node-complete {
+  @apply workflow-node border-hercules-success/50;
+}
+
+.workflow-node-error {
+  @apply workflow-node border-hercules-error/50;
+}
+
+.workflow-node-pending {
+  @apply workflow-node border-hercules-border opacity-60;
+}
+
+/* System Metric */
+.system-metric {
+  @apply flex items-baseline gap-2;
+}
+
+.system-metric-value {
+  @apply text-display-sm font-display font-semibold text-hercules-text tabular-nums;
+}
+
+.system-metric-label {
+  @apply text-caption text-hercules-text-muted uppercase tracking-wider;
+}
+
+.system-metric-unit {
+  @apply text-body-sm text-hercules-text-muted;
+}
+
+/* Hologram State Classes */
+.hologram-idle {
+  --holo-intensity: 0.4;
+  --holo-speed: 1;
+  --holo-complexity: 0.3;
+}
+
+.hologram-listening {
+  --holo-intensity: 0.8;
+  --holo-speed: 1.5;
+  --holo-complexity: 0.6;
+}
+
+.hologram-thinking {
+  --holo-intensity: 0.7;
+  --holo-speed: 1.2;
+  --holo-complexity: 0.9;
+}
+
+.hologram-speaking {
+  --holo-intensity: 0.9;
+  --holo-speed: 2;
+  --holo-complexity: 0.7;
+}
+
+.hologram-executing {
+  --holo-intensity: 0.85;
+  --holo-speed: 1.8;
+  --holo-complexity: 0.8;
+}
+
+.hologram-success {
+  --holo-intensity: 1;
+  --holo-speed: 0.5;
+  --holo-complexity: 0.4;
+}
+
+.hologram-warning {
+  --holo-intensity: 0.9;
+  --holo-speed: 1.5;
+  --holo-complexity: 0.5;
+}
+
+.hologram-error {
+  --holo-intensity: 0.8;
+  --holo-speed: 0.8;
+  --holo-complexity: 0.3;
+}
+
+.hologram-offline {
+  --holo-intensity: 0.2;
+  --holo-speed: 0.3;
+  --holo-complexity: 0.1;
+}

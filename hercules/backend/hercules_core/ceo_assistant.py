@@ -7,6 +7,22 @@ import re
 from typing import Dict, Any, List
 from .skills import skills_registry
 
+# Implementation-class verbs route to the Claude Code execution worker (a real
+# code-building / refactor / scaffold task), and NOT when a stronger intent from
+# another department (image/video/email/pdf/design/research) is present.
+_IMPLEMENT_VERBS = [
+    "build", "implement", "refactor", "scaffold", "write a script",
+    "create a project", "create a folder", "set up", "write tests",
+    "deploy", "write code to", "fix this repo", "create a function",
+    "add feature", "make a script", "create a real",
+]
+_OTHER_INTENT = [
+    "image", "picture", "photo", "draw", "video", "storyboard",
+    "music", "song", "audio", "logo", "badge", "svg", "email", "mail",
+    "pdf", "document", "clipboard", "theme", "color", "palette",
+    "mermaid", "flowchart", "diagram", "mindmap", "scrape", "meet",
+]
+
 class CEOAssistant:
     """Prompt Refiner and Operational Decomposer."""
 
@@ -46,22 +62,10 @@ class CEOAssistant:
         #    error to debug nor an optimization pass), dispatch the whole task to
         #    the Claude Code execution agent rather than a sandboxed snippet.
         #    Guarded so generation/research/design/labour intent still wins.
-        IMPLEMENT_VERBS = [
-            "build", "implement", "refactor", "scaffold", "write a script",
-            "create a project", "create a folder", "set up", "write tests",
-            "deploy", "write code to", "fix this repo", "create a function",
-            "add feature", "make a script", "create a real",
-        ]
-        OTHER_INTENT = [
-            "image", "picture", "photo", "draw", "video", "storyboard",
-            "music", "song", "audio", "logo", "badge", "svg", "email", "mail",
-            "pdf", "document", "clipboard", "theme", "color", "palette",
-            "mermaid", "flowchart", "diagram", "mindmap", "scrape", "meet",
-        ]
         elif ("claude code" in p_lower or "using claude" in p_lower
               or "delegate to claude" in p_lower) or (
-            any(k in p_lower for k in IMPLEMENT_VERBS)
-            and not any(k in p_lower for k in OTHER_INTENT)
+            any(k in p_lower for k in _IMPLEMENT_VERBS)
+            and not any(k in p_lower for k in _OTHER_INTENT)
         ):
             department = "Coding"
             agent = "Claude Code"

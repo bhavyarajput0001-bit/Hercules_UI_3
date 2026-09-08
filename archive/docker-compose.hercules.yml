@@ -1,0 +1,101 @@
+version: '3.8'
+
+services:
+  # OmniRoute - AI Gateway (existing)
+  omniroute:
+    image: omniroute:3.8.49
+    build:
+      context: ../OmniRoute-release-v3.8.49
+      dockerfile: Dockerfile
+    ports:
+      - "20128:20128"
+    environment:
+      - PORT=20128
+      - JWT_SECRET=${JWT_SECRET}
+      - API_KEY_SECRET=${API_KEY_SECRET}
+      - INITIAL_PASSWORD=${INITIAL_PASSWORD}
+    volumes:
+      - omniroute-data:/app/data
+    networks:
+      - hercules-network
+
+  # Hercules Core - Backend API
+  hercules-core:
+    build:
+      context: ./hercules-core
+      dockerfile: Dockerfile
+    ports:
+      - "8420:8420"
+    environment:
+      - OMNIROUTE_BASE_URL=http://omniroute:20128
+      - OMNIROUTE_API_KEY=dev-key
+      - CORS_ORIGINS=http://localhost:5173,http://localhost:3000
+    volumes:
+      - hercules-core-storage:/app/storage
+    depends_on:
+      - omniroute
+    networks:
+      - hercules-network
+
+  # Hercules Frontend - Vite Dev Server
+  hercules-frontend:
+    build:
+      context: ./Hercules/hercules
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_HERCULES_TRANSPORT=http
+      - VITE_HERCULES_API_BASE=http://localhost:8420
+    volumes:
+      - ./Hercules/hercules:/app
+      - /app/node_modules
+    depends_on:
+      - hercules-core
+    networks:
+      - hercules-network
+
+  # Autonomous AI SaaS Frontend
+  autonomous-ai-saas:
+    build:
+      context: ./autonomous-ai-saas
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    environment:
+      - OMNIROUTE_BASE_URL=http://omniroute:20128
+      - OMNIROUTE_API_KEY=dev-key
+      - PYTHON_AI_SERVICE_URL=http://ai-service:8000
+    volumes:
+      - ./autonomous-ai-saas:/app
+      - /app/node_modules
+    depends_on:
+      - omniroute
+      - ai-service
+    networks:
+      - hercules-network
+
+  # Autonomous AI SaaS - Python AI Service
+  ai-service:
+    build:
+      context: ./autonomous-ai-saas/ai-service
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - OMNIROUTE_BASE_URL=http://omniroute:20128
+      - OMNIROUTE_API_KEY=dev-key
+    volumes:
+      - ./autonomous-ai-saas/ai-service:/app
+    depends_on:
+      - omniroute
+    networks:
+      - hercules-network
+
+volumes:
+  omniroute-data:
+  hercules-core-storage:
+
+networks:
+  hercules-network:
+    driver: bridge
